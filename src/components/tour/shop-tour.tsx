@@ -190,7 +190,7 @@ export function ShopTour({ bengaliFont }: { bengaliFont: string }) {
       <button className="tour-plan-toggle" onClick={() => setPlanOpen((open) => !open)} aria-expanded={planOpen} aria-controls="tour-plan">{planOpen ? "Close ×" : "Shop map"}</button>
       <nav id="tour-plan" className="tour-plan" data-open={planOpen} aria-label="Shop map">
         <p className="tour-kicker">The shop · Fourth floor</p>
-        <svg viewBox="0 0 100 86" role="img" aria-label="Map of the one-room shop: necklace arch on the back wall, chains on the left, ring counter in the middle, earring counter on the right, door at the front">
+        <svg viewBox="0 0 100 86" role="img" aria-label="Map of the one-room shop: necklace hall on the back wall, logo wall on the left, showroom wall on the right, door at the front">
           <path className="tour-plan-wall" d="M4 4h92v74H58M42 78H4V4" />
           {PLAN_ZONES.map((zone) => <path key={zone.id} d={zone.d} className={scene.id === zone.id ? "is-here" : ""} onClick={() => goTo(sceneIndex(zone.id))} />)}
           {PLAN_ZONES.map((zone) => {
