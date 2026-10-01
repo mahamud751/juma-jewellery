@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import { Hind_Siliguri } from "next/font/google";
-import { ShopTour } from "@/components/tour/shop-tour";
-
-const bengali = Hind_Siliguri({ subsets: ["bengali"], weight: ["400", "600"], variable: "--font-bengali", display: "swap" });
+import { JourneyExperience } from "@/components/journey/journey-experience";
 
 export const metadata: Metadata = {
-  title: { absolute: "Jhuma Jewellers — Visit the shop from home" },
-  description: "Walk into Jhuma Jewellers at Sylhet Plaza, Zindabazar, and look at every display: necklace sets, chains, rings and earrings, photographed in the shop.",
+  title: { absolute: "Jhuma Jewellers — Walk into the salon" },
+  description: "From Zindabazar to the fourth floor of Sylhet Plaza. Walk through the Jhuma doors and turn each gold creation through 360 degrees.",
 };
 
 export default function Home() {
-  return <ShopTour bengaliFont={bengali.variable} />;
+  return <JourneyExperience />;
 }

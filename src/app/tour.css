@@ -40,14 +40,18 @@ html:has(.tour), html:has(.tour) body { height: 100%; overflow: hidden; overscro
 .tour-frame-wrap[data-dragging] .tour-frame { transition: none; }
 .tour-frame img { object-fit: cover; user-select: none; -webkit-user-drag: none; }
 
-/* Walking forward: the old view grows toward where you tapped and fades; the new one settles in. */
-.tour-frame-wrap.is-leaving { z-index: 2; pointer-events: none; animation: tour-leave .9s var(--ease) forwards; }
-.tour-frame-wrap.is-leaving .tour-frame { animation: tour-step .9s cubic-bezier(.5, 0, .3, 1) forwards; }
-.tour-frame-wrap.is-arriving .tour-frame img { animation: tour-arrive 1.4s var(--ease) both; }
-.tour-frame-wrap[data-lite] .tour-frame, .tour-frame-wrap[data-lite] .tour-frame img { animation-duration: .01s !important; }
-@keyframes tour-leave { 0%, 35% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes tour-step { to { scale: 1.6; filter: blur(3px); } }
-@keyframes tour-arrive { from { scale: 1.12; } }
+/*
+ * Walking forward, slowly: the old view moves straight ahead at eye level toward where you tapped,
+ * then dissolves into the next photo, which keeps coming forward until it settles.
+ * Keep the leave duration in step with LEAVE_MS in shop-tour.tsx.
+ */
+.tour-frame-wrap.is-leaving { z-index: 2; pointer-events: none; animation: tour-leave 2.4s ease-in-out forwards; }
+.tour-frame-wrap.is-leaving .tour-frame { animation: tour-step 2.4s cubic-bezier(.4, 0, .3, 1) forwards; }
+.tour-frame-wrap.is-arriving .tour-frame img { animation: tour-arrive 2.8s cubic-bezier(.25, .5, .25, 1) both; }
+.tour-frame-wrap[data-lite], .tour-frame-wrap[data-lite] .tour-frame, .tour-frame-wrap[data-lite] .tour-frame img { animation-duration: .01s !important; animation-delay: 0s !important; }
+@keyframes tour-leave { 0%, 45% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes tour-step { to { scale: 1.75; filter: blur(3px) brightness(.9); } }
+@keyframes tour-arrive { from { scale: 1.28; filter: blur(2px); } }
 
 .tour-preload { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 .tour-pano { position: absolute !important; inset: 0; touch-action: none; cursor: grab; }
@@ -71,7 +75,7 @@ html:has(.tour), html:has(.tour) body { height: 100%; overflow: hidden; overscro
   display: flex;
   align-items: center;
   animation: tour-spot-in .6s var(--ease) both;
-  animation-delay: .5s;
+  animation-delay: 1.6s;
 }
 .tour-spot-dot {
   position: relative;
@@ -145,7 +149,7 @@ html:has(.tour), html:has(.tour) body { height: 100%; overflow: hidden; overscro
 }
 .tour-caption > *, .tour-intro > * { pointer-events: auto; }
 .tour[data-walking] .tour-caption { opacity: 0; transition: opacity .3s; }
-.tour-caption { animation: tour-caption-in .8s var(--ease) .25s both; }
+.tour-caption { animation: tour-caption-in 1s var(--ease) 1s both; }
 @keyframes tour-caption-in { from { opacity: 0; translate: 0 14px; } }
 .tour-kicker { color: var(--gold-soft); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 12px; }
 .tour-caption h1 { font-family: var(--font-display), serif; font-weight: 400; font-size: clamp(36px, 4.4vw, 58px); line-height: 1; letter-spacing: -.01em; text-shadow: 0 2px 24px rgba(0, 0, 0, .5); }
@@ -256,6 +260,7 @@ html:has(.tour), html:has(.tour) body { height: 100%; overflow: hidden; overscro
 /* ── walking film ───────────────────────────────────── */
 .tour-walk { position: absolute; inset: 0; z-index: 4; background: #0b0a09; opacity: 0; transition: opacity .35s; }
 .tour-walk[data-playing] { opacity: 1; }
+.tour-walk[data-ending] { opacity: 0; pointer-events: none; transition: opacity 1.4s ease-in-out; }
 .tour-walk video { width: 100%; height: 100%; object-fit: cover; }
 .tour-walk-skip { position: absolute; right: clamp(16px, 4vw, 56px); bottom: 110px; padding: 10px 16px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); font-size: 13px; }
 

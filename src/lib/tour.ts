@@ -43,7 +43,7 @@ export const SCENES: Scene[] = [
     line: "The market front on Zindabazar road. Jhuma is inside, on the fourth floor.",
     photo: "/main/31.png",
     alt: "The front of Sylhet Plaza on Zindabazar road, with the Bangla Sylhet Plaza signs over the shop fronts.",
-    hotspots: [{ x: 46, y: 80, label: "Go inside the plaza", go: "lobby" }],
+    hotspots: [{ x: 46, y: 80, label: "Go inside the plaza", go: "lobby", walk: "/main/41-web.mp4" }],
   },
   {
     id: "lobby",

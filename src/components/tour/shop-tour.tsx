@@ -10,15 +10,14 @@ import "@/app/tour.css";
 
 const PanoView = dynamic(() => import("@/components/tour/pano-view"), { ssr: false });
 const SIZES = "(max-aspect-ratio: 4/3) 142vh, 106vw";
-const LEAVE_MS = 900;
-const WALK_MAX_MS = 3200;
+const LEAVE_MS = 2400;
 
 type Leaving = { index: number; origin: string; key: number };
 
 export function ShopTour({ bengaliFont }: { bengaliFont: string }) {
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState<Leaving | null>(null);
-  const [walk, setWalk] = useState<{ src: string; to: number; origin: string } | null>(null);
+  const [walk, setWalk] = useState<{ src: string; to: number; origin: string; ending?: boolean } | null>(null);
   const [piece, setPiece] = useState<Piece | null>(null);
   const [film, setFilm] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
@@ -53,6 +52,20 @@ export function ShopTour({ bengaliFont }: { bengaliFont: string }) {
     history.replaceState(null, "", `#${SCENES[to].id}`);
   }, []);
 
+  /** The walking film has reached the next spot: show it underneath and let the film fade away over it. */
+  const arrive = useCallback((to: number) => {
+    indexRef.current = to;
+    setIndex(to);
+    setWalk((current) => current && { ...current, ending: true });
+    history.replaceState(null, "", `#${SCENES[to].id}`);
+  }, []);
+
+  useEffect(() => {
+    if (!walk?.ending) return;
+    const timer = setTimeout(() => setWalk(null), LEAVE_MS);
+    return () => clearTimeout(timer);
+  }, [walk]);
+
   useEffect(() => {
     if (!leaving) return;
     const timer = setTimeout(() => setLeaving(null), LEAVE_MS);
@@ -67,8 +80,8 @@ export function ShopTour({ bengaliFont }: { bengaliFont: string }) {
   }, [closePanels, commit, lite]);
 
   const activate = useCallback((spot: Hotspot) => {
-    const origin = `${spot.x}% ${spot.y}%`;
-    if ("go" in spot) goTo(sceneIndex(spot.go), origin, spot.walk);
+    // Walk straight ahead at eye level: head toward the spot left or right, but not down to the floor where most dots sit.
+    if ("go" in spot) goTo(sceneIndex(spot.go), `${spot.x}% ${Math.min(55, Math.max(35, spot.y))}%`, spot.walk);
     else if ("note" in spot) { closePanels(); setNote(spot.note); }
     else { closePanels(); setPiece(hotspotPiece(spot) ?? null); }
   }, [goTo, closePanels]);
@@ -105,6 +118,7 @@ export function ShopTour({ bengaliFont }: { bengaliFont: string }) {
   // A trackpad sends a long burst of events per swipe, so each burst moves one spot only.
   const walking = useRef(false);
   useEffect(() => { walking.current = Boolean(walk); }, [walk]);
+  const filmRunning = Boolean(walk && !walk.ending);
   useEffect(() => {
     let total = 0;
     let lastEvent = 0;
@@ -117,8 +131,8 @@ export function ShopTour({ bengaliFont }: { bengaliFont: string }) {
       const quiet = now - lastEvent > 220;
       lastEvent = now;
       if (quiet) total = 0;
-      // Wait out the inertia tail of the previous swipe before taking another step.
-      if (now - lastMove < 900 && !quiet) return;
+      // Let each slow walk finish (and the swipe's inertia tail die out) before taking another step.
+      if (now - lastMove < LEAVE_MS) return;
       total += Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : 0;
       if (Math.abs(total) < 40) return;
       lastMove = now;
@@ -135,15 +149,17 @@ export function ShopTour({ bengaliFont }: { bengaliFont: string }) {
   const renderSpot = (spot: Hotspot) => <SpotButton spot={spot} onActivate={activate} />;
 
   return (
-    <div className={`tour ${bengaliFont}`} data-area={scene.area} data-started={started || undefined} data-walking={walk ? "" : undefined}>
+    <div className={`tour ${bengaliFont}`} data-area={scene.area} data-started={started || undefined} data-walking={filmRunning ? "" : undefined}>
       <div className="tour-view" aria-hidden={piece || film ? true : undefined}>
         {leaving && <SceneFrame key={`leave-${leaving.key}`} index={leaving.index} leaving origin={leaving.origin} lite={lite} />}
         {scene.pano
           ? <PanoView key={scene.id} src={scene.pano} hotspots={scene.hotspots} renderSpot={renderSpot} />
-          : <SceneFrame key={scene.id} index={index} arriving={Boolean(leaving)} lite={lite} renderSpot={renderSpot} />}
-        {walk && <WalkFilm {...walk} onDone={() => commit(walk.to, walk.origin)} />}
+          : <SceneFrame key={scene.id} index={index} arriving={Boolean(leaving || walk?.ending)} lite={lite} renderSpot={renderSpot} />}
+        {walk && <WalkFilm key={walk.src} src={walk.src} ending={walk.ending} onDone={() => arrive(walk.to)} />}
         <div className="tour-preload" aria-hidden="true">
           {preload.map((i) => <Image key={SCENES[i].id} src={SCENES[i].photo} alt="" fill sizes={SIZES} loading="eager" />)}
+          {/* Fetch the walking films from this spot ahead of the tap, so they start at once. */}
+          {!lite && scene.hotspots.map((spot) => "walk" in spot && spot.walk && <video key={spot.walk} src={spot.walk} muted playsInline preload="auto" />)}
         </div>
       </div>
       <div className="tour-shade" aria-hidden="true" />
@@ -317,29 +333,26 @@ function SceneFrame({ index, leaving, arriving, origin, lite, renderSpot }: { in
   </div>;
 }
 
-/** Plays the walking film between two spots. If it cannot start quickly the walk just cuts. */
-function WalkFilm({ src, onDone }: { src: string; onDone: () => void }) {
+/** Plays the whole walking film between two spots, then fades away over the next one. If it cannot start, the walk just cuts. */
+function WalkFilm({ src, ending, onDone }: { src: string; ending?: boolean; onDone: () => void }) {
   const video = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const done = useRef(onDone);
   useEffect(() => { done.current = onDone; });
   useEffect(() => {
     const element = video.current;
-    let finish: ReturnType<typeof setTimeout> | undefined;
-    const giveUp = setTimeout(() => { if (!element || element.paused) done.current(); }, 1200);
-    const onPlaying = () => {
-      setPlaying(true);
-      clearTimeout(giveUp);
-      const left = Math.min(WALK_MAX_MS, ((element?.duration || 3) - (element?.currentTime || 0)) * 1000);
-      finish = setTimeout(() => done.current(), left);
-    };
+    let finished = false;
+    const finish = () => { if (!finished) { finished = true; done.current(); } };
+    const giveUp = setTimeout(() => { if (!element || element.paused) finish(); }, 3000);
+    const onPlaying = () => { setPlaying(true); clearTimeout(giveUp); };
     element?.addEventListener("playing", onPlaying, { once: true });
-    element?.play().catch(() => done.current());
-    return () => { clearTimeout(giveUp); clearTimeout(finish); element?.removeEventListener("playing", onPlaying); };
+    element?.addEventListener("ended", finish, { once: true });
+    element?.play().catch(finish);
+    return () => { clearTimeout(giveUp); element?.removeEventListener("playing", onPlaying); element?.removeEventListener("ended", finish); };
   }, []);
-  return <div className="tour-walk" data-playing={playing || undefined}>
+  return <div className="tour-walk" data-playing={playing || undefined} data-ending={ending || undefined}>
     <video ref={video} src={src} muted playsInline preload="auto" />
-    <button className="tour-walk-skip" onClick={() => done.current()}>Skip →</button>
+    {!ending && <button className="tour-walk-skip" onClick={() => done.current()}>Skip →</button>}
   </div>;
 }
 
