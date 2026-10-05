@@ -26,22 +26,22 @@ export const STOPS: Stop[] = [
   { label: "The doors", kicker: "Jhuma Jewellers", title: "Beyond these doors.", line: "Keep scrolling. The doors are opening for you.", photo: 35 },
   { label: "The salon", kicker: "The Jhuma salon", title: "Welcome to Jhuma.", line: "Gold on royal blue velvet, framed in carved wood and warm light.", photo: 36 },
   { label: "Chain gallery", kicker: "The chain gallery", title: "Every chain,\nunder the golden arch.", line: "Rope, box and floral chains, with the pendants at the centre.", photo: 37 },
-  { label: "Mango pendant", kicker: "Creation 01 · Chain gallery", title: "Mango Pendant Chain", line: "A paisley pendant in raised filigree, with a ruby at its heart and a fringe of gold drops.", photo: 37, piece: 0 },
+  { label: "Floral chains", kicker: "Creation 01 · Chain gallery", title: "Floral Chains", line: "The chains as they hang in the salon: flower stations, rope and a fine trace, on royal blue.", photo: 37, piece: 0 },
   { label: "Necklace wall", kicker: "The necklace wall", title: "Gold, on royal blue.", line: "Bridal sets on velvet busts, each with its matching earrings.", photo: 38 },
-  { label: "Rani haar", kicker: "Creation 02 · Necklace wall", title: "Rani Haar", line: "A bridal collar of hand-set flowers, a layered bead strand and a ruby drop pendant.", photo: 38, piece: 1 },
-  { label: "Jhumka", kicker: "Creation 03 · Necklace wall", title: "Bell Jhumka", line: "Domed gold bells fringed with beads. They move when you do.", photo: 38, piece: 2 },
-  { label: "Churi", kicker: "Creation 04 · The counter", title: "Bridal Churi", line: "A stack of three: two beaded bands around a twisted rope kada.", photo: 38, piece: 3 },
-  { label: "Flower ring", kicker: "Creation 05 · The counter", title: "Flower Ring", line: "Eight petals of raised filigree, crowned with a ruby.", photo: 38, piece: 4 },
+  { label: "Floral har", kicker: "Creation 02 · Necklace wall", title: "Floral Har", line: "The layered set from the alcove. A filigree collar, a flower pendant, and the jhumka made to sit with it.", photo: 38, piece: 1 },
+  { label: "Jhumka", kicker: "Creation 03 · Necklace wall", title: "Bell Jhumka", line: "The jhumka from that set: a round gold bell, beadwork, and a small drop.", photo: 38, piece: 2 },
+  { label: "Fan pendant", kicker: "Creation 04 · Necklace wall", title: "Fan Pendant", line: "A long haar from the alcove, the pendant fringed in gold, with its earrings beside it.", photo: 38, piece: 3 },
+  { label: "Gold rings", kicker: "Creation 05 · The counter", title: "Gold Rings", line: "Signet rings and gold bands, each on its own blue cushion, as they sit on the counter.", photo: 38, piece: 4 },
   { label: "Private viewing", kicker: "Private viewing · Sylhet Plaza, 4th floor", title: "A seat is\nwaiting for you.", line: "Book a private viewing and we will have your pieces ready when you arrive.", photo: 36 },
 ];
 export const LAST_STOP = STOPS.length - 1;
 
 export const PIECES = [
-  { name: "Mango Pendant Chain", bengali: "আম লকেট চেইন", details: ["Gold", "Filigree", "Ruby"] },
-  { name: "Rani Haar", bengali: "রানী হার", details: ["Gold", "Bridal set", "Ruby drop"] },
-  { name: "Bell Jhumka", bengali: "ঝুমকা", details: ["Gold", "Pair", "Bead fringe"] },
-  { name: "Bridal Churi", bengali: "চুড়ি", details: ["Gold", "Set of three", "Rope kada"] },
-  { name: "Flower Ring", bengali: "ফুল আংটি", details: ["Gold", "Filigree", "Ruby"] },
+  { name: "Floral Chains", bengali: "ফুলের চেইন", slug: "chain-boards", details: ["Yellow gold", "The chain boards", "Jhuma, Sylhet"] },
+  { name: "Floral Har", bengali: "ফ্লোরাল হার", slug: "floral-har", details: ["Yellow gold", "Necklace and jhumka", "The alcove"] },
+  { name: "Bell Jhumka", bengali: "ঝুমকা", slug: "floral-har", details: ["Yellow gold", "From the floral set", "Bead and drop"] },
+  { name: "Fan Pendant", bengali: "পাখা লকেট", slug: "fan-pendant", details: ["Yellow gold", "Fringed haar", "Matching earrings"] },
+  { name: "Gold Rings", bengali: "সোনার আংটি", slug: "ring-counter-near", details: ["Yellow gold", "Signet and band", "The ring counter"] },
 ] as const;
 /** The stop each creation is shown at. */
 export const PIECE_STOPS = STOPS.flatMap((stop, index) => (stop.piece === undefined ? [] : [index]));

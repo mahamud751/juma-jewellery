@@ -26,6 +26,7 @@ function Driver({ progress, easedRef, spinRef, reduced }: { progress: RefObject<
     easedRef.current = reduced ? progress.current : THREE.MathUtils.damp(easedRef.current, progress.current, 5.5, dt);
     const s = spinRef.current;
     if (s && Math.abs(s.velocity) > .0005) { s.angle += s.velocity * dt; s.velocity *= Math.exp(-2.6 * dt); }
+    if (s) s.angle = THREE.MathUtils.clamp(s.angle, -1.15, 1.15);
   }, -2);
   return null;
 }

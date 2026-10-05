@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MediaFrame } from "@/components/site/media-frame";
+import { OriginalStage } from "@/components/site/original-stage";
 import { WishButton } from "@/components/site/piece-card";
 import type { Collection, Piece } from "@/lib/catalog";
 
@@ -22,7 +23,7 @@ export function PieceDetail({ piece, collection }: { piece: Piece; collection: C
   return (
     <section className="pdp">
       <div className="pdp-stage" style={{ ["--accent" as string]: collection.accent }}>
-        <MediaFrame piece={piece} variant="full" controls={piece.kind === "film"} />
+        {piece.kind === "photo" ? <OriginalStage src={piece.src} alt={piece.alt} /> : <MediaFrame piece={piece} variant="full" controls />}
       </div>
 
       <div className="pdp-info">

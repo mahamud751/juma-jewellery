@@ -509,6 +509,9 @@ html:has(.site) {
   display: block;
 }
 
+.original-stage { position: absolute; inset: 0; touch-action: pan-y; }
+.original-stage canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
+
 .pdp-hint {
   position: absolute;
   left: 50%;

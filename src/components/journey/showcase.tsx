@@ -7,18 +7,19 @@ import * as THREE from "three";
 import { Studio } from "@/components/jewels";
 import { DOORS, PIECE_STOPS, smooth } from "@/lib/journey";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { BUILDERS, glintPoints, type PieceGeometry } from "./gold";
+import { ReliefPhoto } from "@/components/relief-photo";
 
 export type Spin = { angle: number; velocity: number };
 type Props = { progress: RefObject<number>; spin: RefObject<Spin>; reduced: boolean };
 
-const GOLD = new THREE.MeshPhysicalMaterial({ color: "#f6c45c", metalness: 1, roughness: .22, envMapIntensity: 1.7, side: THREE.DoubleSide });
-const RUBY = new THREE.MeshPhysicalMaterial({ color: "#a1001c", metalness: 0, roughness: .05, clearcoat: 1, clearcoatRoughness: .02, ior: 1.76, specularIntensity: 1, envMapIntensity: 2.6, emissive: "#2e0006" });
-const VELVET = new THREE.MeshPhysicalMaterial({ color: "#061650", roughness: 1, metalness: 0, sheen: 1, sheenColor: new THREE.Color("#3355c0"), sheenRoughness: .45, envMapIntensity: .3 });
-
-/** How tall each creation is drawn, in scene units (busts are cropped below the chest), and its resting angle. */
-const PIECE_HEIGHT = [2.85, 2.85, 1.6, 1.75, 1.45];
-const PIECE_YAW = [-.25, -.25, .3, 0, .3];
+/** Salon photographs, in the order the walk presents them. Height is the piece in scene units. */
+const ORIGINALS = [
+  { src: "/media/hero/chains.jpg", height: 2.5 },
+  { src: "/media/full/IMG_7126.jpg", height: 1.85 },
+  { src: "/media/hero/jhumka.jpg", height: 2.45 },
+  { src: "/media/hero/fan.jpg", height: 2.7 },
+  { src: "/media/hero/rings.jpg", height: 1.42 },
+];
 
 function textTexture(lines: { text: string; font: string; color: string; y: number }[], width = 1024, height = 256, background?: string) {
   const canvas = document.createElement("canvas");
@@ -160,91 +161,37 @@ function Doors({ progress }: { progress: RefObject<number> }) {
 
 /* ───────────────────────── The creations ───────────────────────── */
 
-const glintVertex = /* glsl */ `
-  attribute float phase;
-  uniform float time, scale, size;
-  varying float vStrength;
-  void main() {
-    vec4 view = modelViewMatrix * vec4(position, 1.0);
-    vec3 n = normalize(normalMatrix * normal);
-    vec3 eye = normalize(-view.xyz);
-    vec3 light = normalize(vec3(-.4, .7, .6));
-    float facing = max(dot(reflect(-light, n), eye), 0.0);
-    vStrength = pow(facing, 18.0) * (.55 + .45 * sin(time * 2.6 + phase)) * scale;
-    gl_PointSize = size * vStrength / -view.z;
-    gl_Position = projectionMatrix * view;
-  }
-`;
-const glintFragment = /* glsl */ `
-  varying float vStrength;
-  void main() {
-    vec2 c = gl_PointCoord - .5;
-    float star = max(0.0, 1.0 - abs(c.x) * 18.0) * max(0.0, 1.0 - abs(c.y) * 2.2) + max(0.0, 1.0 - abs(c.y) * 18.0) * max(0.0, 1.0 - abs(c.x) * 2.2);
-    float core = exp(-dot(c, c) * 90.0);
-    gl_FragColor = vec4(vec3(1.0, .93, .78) * (star * .9 + core), (star + core) * min(1.0, vStrength));
-  }
-`;
-
-function Glints({ geometry, visible }: { geometry: THREE.BufferGeometry; visible: RefObject<number> }) {
-  const dpr = useThree((state) => state.viewport.dpr);
-  const points = useMemo(() => {
-    const { positions, normals, phases } = glintPoints(geometry, 70);
-    const buffer = new THREE.BufferGeometry();
-    buffer.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    buffer.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
-    buffer.setAttribute("phase", new THREE.BufferAttribute(phases, 1));
-    return buffer;
-  }, [geometry]);
-  const material = useMemo(() => new THREE.ShaderMaterial({
-    vertexShader: glintVertex, fragmentShader: glintFragment, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    uniforms: { time: { value: 0 }, scale: { value: 0 }, size: { value: 140 } },
-  }), []);
-  useEffect(() => () => { points.dispose(); material.dispose(); }, [points, material]);
-  const pointsRef = useRef<THREE.Points>(null);
-  useFrame(({ clock }) => {
-    const shader = pointsRef.current?.material as THREE.ShaderMaterial | undefined;
-    if (!shader) return;
-    shader.uniforms.time.value = clock.elapsedTime;
-    shader.uniforms.scale.value = visible.current ?? 0;
-    shader.uniforms.size.value = 150 * dpr;
-  });
-  return <points ref={pointsRef} geometry={points} material={material} />;
-}
-
-function Creation({ index, piece, progress, spin, reduced }: { index: number; piece: PieceGeometry; progress: RefObject<number>; spin: RefObject<Spin>; reduced: boolean }) {
+function Creation({ index, progress, spin, reduced }: { index: number; progress: RefObject<number>; spin: RefObject<Spin>; reduced: boolean }) {
   const outer = useRef<THREE.Group>(null), turn = useRef<THREE.Group>(null);
-  const shown = useRef(0);
   const stop = PIECE_STOPS[index];
-  const scale = PIECE_HEIGHT[index] / piece.height;
+  const piece = ORIGINALS[index];
   const size = useThree((state) => state.size);
   const portrait = size.width / size.height < .8;
   useFrame(({ clock }) => {
     const distance = progress.current - stop;
     const v = 1 - smooth(.22, .5, Math.abs(distance));
-    shown.current = v;
     if (!outer.current || !turn.current) return;
     outer.current.visible = v > .001;
     if (!outer.current.visible) return;
     const eased = 1 - (1 - v) ** 3;
-    outer.current.scale.setScalar(scale * (portrait ? .82 : 1) * (.55 + .45 * eased));
-    outer.current.position.set(portrait ? 0 : 1.05, (portrait ? .42 : .02) - (1 - eased) * .5 * Math.sign(distance || 1), 0);
-    // One full turn as you scroll past the creation, plus your own drag and a slow turntable drift.
-    turn.current.rotation.y = PIECE_YAW[index] + distance / .9 * Math.PI * 2 + (spin.current?.angle ?? 0) + (reduced ? 0 : Math.sin(clock.elapsedTime * .45) * .32);
-    turn.current.rotation.x = Math.sin(clock.elapsedTime * .5) * (reduced ? 0 : .025);
+    // Phones keep the copy in the lower half, so the photograph sits higher and smaller.
+    outer.current.scale.setScalar((portrait ? .62 : 1) * (.55 + .45 * eased));
+    outer.current.position.set(portrait ? 0 : 1.05, (portrait ? .95 : .02) - (1 - eased) * .5 * Math.sign(distance || 1), 0);
+    // Stay on the photograph. A full spin would show the back of the print.
+    const sweep = reduced ? 0 : Math.sin(distance * 1.7) * .42;
+    const idle = reduced ? 0 : Math.sin(clock.elapsedTime * .4) * .08;
+    const drag = THREE.MathUtils.clamp(spin.current?.angle ?? 0, -1.15, 1.15);
+    turn.current.rotation.y = sweep + drag * .62 + idle;
+    turn.current.rotation.x = Math.sin(clock.elapsedTime * .5) * (reduced ? 0 : .03);
   });
   return <group ref={outer} visible={false}>
     <group ref={turn}>
-      <mesh geometry={piece.gold} material={GOLD} />
-      {piece.stone && <mesh geometry={piece.stone} material={RUBY} />}
-      {piece.velvet && <mesh geometry={piece.velvet} material={VELVET} />}
-      <Glints geometry={piece.gold} visible={shown} />
+      <ReliefPhoto src={piece.src} height={piece.height} />
     </group>
   </group>;
 }
 
 function Showcase({ progress, spin, reduced }: Props) {
-  const pieces = useMemo(() => BUILDERS.map((build) => build()), []);
-  useEffect(() => () => pieces.forEach((piece) => { piece.gold.dispose(); piece.stone?.dispose(); piece.velvet?.dispose(); }), [pieces]);
   const halo = useRef<THREE.Mesh>(null);
   const haloMap = useMemo(() => radialTexture([[0, "rgba(255,214,140,.55)"], [.35, "rgba(214,160,80,.18)"], [1, "rgba(120,80,40,0)"]]), []);
   useEffect(() => () => haloMap.dispose(), [haloMap]);
@@ -257,14 +204,14 @@ function Showcase({ progress, spin, reduced }: Props) {
     if (halo.current) {
       halo.current.visible = v > .001;
       (halo.current.material as THREE.MeshBasicMaterial).opacity = v;
-      halo.current.position.set(portrait ? 0 : 1.05, portrait ? .42 : 0, -1.6);
+      halo.current.position.set(portrait ? 0 : 1.05, portrait ? .95 : 0, -1.6);
     }
     if (dust.current) { dust.current.visible = v > .05; dust.current.position.x = portrait ? 0 : 1.05; }
   });
   return <>
     <mesh ref={halo} visible={false}><planeGeometry args={[5.2, 5.2]} /><meshBasicMaterial map={haloMap} transparent blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} /></mesh>
     <group ref={dust} visible={false}>{!reduced && <Sparkles count={70} scale={[3.2, 3, 2]} size={2.2} speed={.25} opacity={.7} color="#ffd98f" noise={.6} />}</group>
-    {pieces.map((piece, index) => <Creation key={index} index={index} piece={piece} progress={progress} spin={spin} reduced={reduced} />)}
+    {ORIGINALS.map((piece, index) => <Creation key={piece.src} index={index} progress={progress} spin={spin} reduced={reduced} />)}
   </>;
 }
 

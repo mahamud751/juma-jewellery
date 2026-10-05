@@ -151,7 +151,8 @@ export function JourneyExperience() {
           {index === MALL.stop && <button className="jr-button" onClick={() => visit(MALL.stop + 1)}>Continue through the plaza <span>↓</span></button>}
           {index === DOOR_STOP && <button className="jr-button" onClick={() => visit(DOOR_STOP + 1)}>Open the doors <span>↓</span></button>}
           {creation && <div className="jr-piece-actions">
-            <span className="jr-drag"><b>⟲</b> Drag to turn 360°</span>
+            <span className="jr-drag"><b>⟲</b> Drag to turn</span>
+            <Link href={`/jewellery/${creation.slug}`} className="jr-link">The original piece ↗</Link>
             <Link href="/appointment" className="jr-link">Ask to see this piece ↗</Link>
           </div>}
           {index === LAST_STOP && <div className="jr-piece-actions">
