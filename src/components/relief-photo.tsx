@@ -7,7 +7,7 @@ import * as THREE from "three";
  * The salon photograph, bowed into a shallow relief. Bright gold lifts off the
  * velvet so a turn shows the real piece, not a stand-in model.
  */
-function reliefFrom(image: CanvasImageSource, width: number, height: number) {
+export function reliefFrom(image: CanvasImageSource, width: number, height: number) {
   const cols = 88;
   const rows = 64;
   const geometry = new THREE.PlaneGeometry(width, height, cols, rows);

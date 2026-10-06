@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { JourneyExperience } from "@/components/journey/journey-experience";
+import { HomeExperience } from "@/components/home-experience";
 
 export const metadata: Metadata = {
-  title: { absolute: "Jhuma Jewellers — Walk into the salon" },
-  description: "From Zindabazar to the fourth floor of Sylhet Plaza. Walk through the Jhuma doors and turn the jewellery photographed in the salon.",
+  title: { absolute: "Jhuma Jewellers — Gold, the Sylhet way" },
+  description: "Walk from Zindabazar up to the Jhuma salon, then scroll through the hall: a box, a cabinet, a curtain and a drawer open one by one on the jewellery photographed in the salon.",
 };
 
 export default function Home() {
-  return <JourneyExperience />;
+  return <HomeExperience />;
 }

@@ -445,7 +445,7 @@ export function Experience() {
 }
 
 /** Counts up toward the real load progress so the number never jumps. */
-function LoaderCount({ value, done }: { value: number; done: boolean }) {
+export function LoaderCount({ value, done }: { value: number; done: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const shown = useRef(0);
 
@@ -464,7 +464,7 @@ function LoaderCount({ value, done }: { value: number; done: boolean }) {
   return <div ref={ref} className={`loader-count ${done ? "is-done" : ""}`} aria-hidden="true">000</div>;
 }
 
-function ScrollRail({ section, onJump }: { section: number; onJump: (index: number) => void }) {
+export function ScrollRail({ section, onJump, count = SECTION_COUNT }: { section: number; onJump: (index: number) => void; count?: number }) {
   const pathRef = useRef<SVGPathElement>(null);
   const gemRef = useRef<HTMLDivElement>(null);
   const current = useRef(0);
@@ -477,7 +477,7 @@ function ScrollRail({ section, onJump }: { section: number; onJump: (index: numb
     let frame = 0;
     const tick = () => {
       current.current += (section - current.current) * 0.07;
-      const point = path.getPointAtLength(length * (current.current / (SECTION_COUNT - 1)));
+      const point = path.getPointAtLength(length * (current.current / (count - 1)));
       gem.style.left = `${(point.x / 30) * 100}%`;
       gem.style.top = `${(point.y / 452) * 100}%`;
       if (Math.abs(section - current.current) > 0.001) {
@@ -486,7 +486,7 @@ function ScrollRail({ section, onJump }: { section: number; onJump: (index: numb
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [section]);
+  }, [section, count]);
 
   return (
     <div
@@ -494,7 +494,7 @@ function ScrollRail({ section, onJump }: { section: number; onJump: (index: numb
       onClick={(event) => {
         const rect = event.currentTarget.getBoundingClientRect();
         const ratio = (event.clientY - rect.top) / rect.height;
-        onJump(Math.round(Math.min(1, Math.max(0, ratio)) * (SECTION_COUNT - 1)));
+        onJump(Math.round(Math.min(1, Math.max(0, ratio)) * (count - 1)));
       }}
     >
       <svg className="scroll-path" viewBox="0 0 30 452" preserveAspectRatio="none">

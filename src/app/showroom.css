@@ -1,0 +1,60 @@
+/* The salon hall on the home page. Layout and type come from the GRAIR rules in globals.css;
+   these only retune them for gold on royal blue. */
+
+.showroom .showroom-hero { font-size: 7.4rem; line-height: 0.84; }
+
+.showroom .chapters button.is-active .chapter-tick {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(228, 194, 122, 0.65);
+}
+
+.showroom .highlight-btn:hover { color: var(--accent); }
+
+.showroom .vignette {
+  background: radial-gradient(ellipse 80% 72% at 50% 46%, transparent 46%, rgba(4, 4, 10, 0.18) 68%, rgba(2, 2, 6, 0.62) 100%);
+}
+
+.showroom.s-0 .vignette {
+  background: linear-gradient(180deg, rgba(2, 2, 6, 0.25) 0%, transparent 30%, transparent 52%, rgba(2, 2, 6, 0.7) 100%);
+}
+
+/* Copy sits over the hall, so give it a soft dark field to stand on. */
+.showroom .section-content .content-wrap { text-shadow: 0 2px 18px rgba(0, 0, 0, 0.65); }
+
+.showroom .place-s3 .content-wrap { align-items: center; text-align: center; }
+.showroom .place-s3 .section-desc { max-width: 30rem; }
+
+.showroom-final {
+  display: flex;
+  gap: 1.6rem;
+  align-items: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.showroom-final a,
+.showroom-final button {
+  color: var(--secondary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.25rem;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.showroom-final a:hover,
+.showroom-final button:hover { color: var(--ink); border-color: var(--accent); }
+
+.showroom-fallback {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(228, 194, 122, 0.28), transparent 30%),
+    radial-gradient(circle at 50% 40%, #0e1a44 0%, #050509 64%);
+}
+
+@media (max-width: 768px) {
+  .showroom .showroom-hero { font-size: 3.1rem; }
+  /* The piece takes the top of the screen; the copy sits under it. */
+  .showroom .section-content .content-wrap { align-self: flex-end; justify-self: auto; }
+  .showroom .place-s3 .content-wrap { align-items: flex-start; text-align: left; }
+  .showroom-final { flex-direction: column; gap: 0.9rem; }
+}
