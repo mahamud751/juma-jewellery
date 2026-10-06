@@ -30,13 +30,18 @@ export type Display = {
 
 export type Chapter = {
   id: string;
+  /** Short name for the rail and the header. */
   name: string;
   eyebrow: string;
+  /** Two lines; the second is set in gold italic, as in the walk. */
   title: string;
   desc: string;
+  bengali?: string;
+  details?: string[];
   highlight: string;
   href?: string;
-  place: Place;
+  /** Which side of the screen the copy takes; the piece takes the other. */
+  place: "l" | "r";
 };
 
 export const HALL = { halfWidth: 3.6, height: 4.4, start: 18.5, end: -40.6 } as const;
@@ -59,61 +64,63 @@ export const DISPLAYS: Display[] = [
 
 export const CHAPTERS: Chapter[] = [
   {
-    id: "overture", name: "Overture", eyebrow: "Jhuma Jewellers",
-    title: "Gold,\nThe Sylhet Way.", desc: "", highlight: "", place: "inter",
+    id: "hall", name: "The hall", eyebrow: "The Jhuma hall",
+    title: "Every case,\nopened.",
+    desc: "Down the hall, case by case. Each one opens as you arrive, and the piece comes out to meet you.",
+    highlight: "Open the first case", place: "l",
   },
   {
-    id: "box", name: "The box", eyebrow: "Floral Har",
-    title: "Opened,\nJust For You.",
-    desc: "Every visit begins the same way: a box on the velvet, and the lid lifted. The Floral Har, a filigree collar with its flower pendant and jhumka.",
-    highlight: "See the Floral Har", href: "/jewellery/floral-har", place: "l",
+    id: "box", name: "Floral har", eyebrow: "Creation 01 · The jewellery box",
+    title: "Opened,\njust for you.", bengali: "ফ্লোরাল হার", details: ["Yellow gold", "Necklace and jhumka", "The jewellery box"],
+    desc: "A box on the velvet, and the lid lifted: the Floral Har, a filigree collar with its flower pendant and jhumka.",
+    highlight: "The original piece", href: "/jewellery/floral-har", place: "l",
   },
   {
-    id: "chains", name: "Chains", eyebrow: "The chain boards",
-    title: "Every Chain,\nIn Its Place.",
+    id: "chains", name: "Chains", eyebrow: "Creation 02 · The chain cabinet",
+    title: "Every chain,\nin its place.", bengali: "চেইন", details: ["Yellow gold", "Rope, box and floral", "The chain boards"],
     desc: "Rope, box and floral chains hang edge to edge on royal blue velvet, the way they are kept on the chain boards.",
-    highlight: "The Chain Boards", href: "/jewellery/chain-boards", place: "r",
+    highlight: "The original piece", href: "/jewellery/chain-boards", place: "r",
   },
   {
-    id: "lotus", name: "Lotus", eyebrow: "Behind the curtain",
-    title: "Behind\nThe Velvet.",
+    id: "lotus", name: "Lotus cascade", eyebrow: "Creation 03 · Behind the curtain",
+    title: "Behind\nthe velvet.", bengali: "পদ্ম হার", details: ["Yellow gold", "Long sets", "Matching earrings"],
     desc: "The curtain parts on the Lotus Cascade: long gold sets on velvet busts, each with its matching earrings.",
-    highlight: "Lotus Cascade", href: "/jewellery/lotus-cascade", place: "l",
+    highlight: "The original piece", href: "/jewellery/lotus-cascade", place: "l",
   },
   {
-    id: "jhumka", name: "Jhumka", eyebrow: "Under the glass",
-    title: "The Bell\nJhumka.",
+    id: "jhumka", name: "Jhumka", eyebrow: "Creation 04 · Under the glass",
+    title: "The bell\njhumka.", bengali: "ঝুমকা", details: ["Yellow gold", "Bell and beadwork", "A small drop"],
     desc: "A round gold bell, beadwork and a small drop, lifted out from under the glass so you can see every detail.",
     highlight: "All earrings", href: "/collections/earrings", place: "r",
   },
   {
-    id: "fan", name: "Fan pendant", eyebrow: "The alcove cabinet",
-    title: "The Fan\nPendant.",
+    id: "fan", name: "Fan pendant", eyebrow: "Creation 05 · The alcove cabinet",
+    title: "The fan\npendant.", bengali: "পাখা লকেট", details: ["Yellow gold", "Fringed haar", "Matching earrings"],
     desc: "A long haar with its pendant fringed in gold, and the earrings made to sit beside it.",
-    highlight: "See the Fan Pendant", href: "/jewellery/fan-pendant", place: "l",
+    highlight: "The original piece", href: "/jewellery/fan-pendant", place: "l",
   },
   {
-    id: "arch", name: "The arch", eyebrow: "Bridal sets",
-    title: "Under\nThe Arch.",
+    id: "arch", name: "Under the arch", eyebrow: "Creation 06 · Bridal sets",
+    title: "Under\nthe arch.", bengali: "বিয়ের সেট", details: ["Yellow gold", "Bridal sets", "The carved arch"],
     desc: "Bridal sets stand together under the carved arch, lit the way they are in the salon.",
-    highlight: "Under the Arch", href: "/jewellery/under-the-arch", place: "r",
+    highlight: "The original piece", href: "/jewellery/under-the-arch", place: "r",
   },
   {
-    id: "rings", name: "Rings", eyebrow: "The ring counter",
-    title: "From The\nRing Counter.",
+    id: "rings", name: "Rings", eyebrow: "Creation 07 · The ring counter",
+    title: "From the\nring counter.", bengali: "সোনার আংটি", details: ["Yellow gold", "Signet and band", "The ring counter"],
     desc: "The drawer slides open: signet rings and gold bands, each on its own blue cushion.",
     highlight: "All rings", href: "/collections/rings", place: "l",
   },
   {
-    id: "earrings", name: "Earrings", eyebrow: "The table case",
-    title: "Tray\nBy Tray.",
+    id: "earrings", name: "Earrings", eyebrow: "Creation 08 · The table case",
+    title: "Tray\nby tray.", bengali: "কানের দুল", details: ["Yellow gold", "Studs and drops", "The earring trays"],
     desc: "The glass lifts on the earring trays: studs, drops and jhumka, row after row.",
-    highlight: "The Earring Trays", href: "/jewellery/earring-trays", place: "r",
+    highlight: "The original piece", href: "/jewellery/earring-trays", place: "r",
   },
   {
-    id: "viewing", name: "Private viewing", eyebrow: "Sylhet Plaza · 4th floor",
-    title: "A Seat Is\nWaiting.",
-    desc: "Zindabazar, Sylhet. Book a private viewing and the pieces you choose will be ready when you arrive.",
+    id: "viewing", name: "Private viewing", eyebrow: "Private viewing · Sylhet Plaza, 4th floor",
+    title: "A seat is\nwaiting.",
+    desc: "Book a private viewing and the pieces you choose will be ready when you arrive.",
     highlight: "Book a private viewing", href: "/appointment", place: "l",
   },
 ];
@@ -123,7 +130,7 @@ export const CHAPTER_COUNT = CHAPTERS.length;
 /** Vertical lens: GRAIR's, widened on portrait screens so the piece keeps its share of the frame. */
 export const fovFor = (aspect: number) => (aspect < 1 ? 30 + (1 - aspect) * 24 : 30);
 
-const OVERTURE = { position: [0, 2.2, 16.2] as Vec3, target: [-0.6, 1.85, 6] as Vec3 };
+const OVERTURE = { position: [0.6, 2.2, 16.2] as Vec3, target: [-2.3, 1.75, 6] as Vec3 };
 
 export const facing = (yaw: number) => [Math.sin(yaw), Math.cos(yaw)] as const;
 

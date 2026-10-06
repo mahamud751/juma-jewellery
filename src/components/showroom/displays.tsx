@@ -67,7 +67,7 @@ export function JewelBox({ display, chapter, smoothRef, reduced }: Props) {
         {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.81, 0.375]} />}
-      <Halo open={open} base={0.08} gain={0.4} size={3.2} flat position={[0, 0.01, 0.3]} />
+      <Halo open={open} base={0.03} gain={0.12} size={3.2} flat position={[0, 0.01, 0.3]} />
     </Place>
   );
 }
@@ -110,7 +110,7 @@ export function Cabinet({ display, chapter, smoothRef, reduced }: Props) {
       <Box size={[1.5, 0.85, 0.7]} at={[0, 0.425, 0]} material={m.wood} />
       <Box size={[1.52, 0.03, 0.72]} at={[0, 0.86, 0]} material={m.gold} />
       <Box size={[1.52, 0.05, 0.72]} at={[0, 0.025, 0]} material={m.gold} />
-      <Box size={[1.44, 1.7, 0.04]} at={[0, 1.72, -0.31]} material={m.velvet} />
+      <Box size={[1.44, 1.7, 0.04]} at={[0, 1.72, -0.31]} material={m.niche} />
       {[-1, 1].flatMap((x) => [-1, 1].map((z) => <Box key={`${x}${z}`} size={[0.035, 1.7, 0.035]} at={[x * 0.73, 1.72, z * 0.32]} material={m.gold} />))}
       {[-1, 1].map((x) => <mesh key={`g${x}`} position={[x * 0.73, 1.72, 0]} rotation={[0, Math.PI / 2, 0]} material={m.glass}><planeGeometry args={[0.64, 1.7]} /></mesh>)}
       <Box size={[1.6, 0.14, 0.78]} at={[0, 2.64, 0]} material={m.wood} />
@@ -124,7 +124,7 @@ export function Cabinet({ display, chapter, smoothRef, reduced }: Props) {
         {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.55, 0.352]} />}
-      <Halo open={open} base={0.08} gain={0.35} size={2.6} flat position={[0, 0.01, 0.9]} />
+      <Halo open={open} base={0.03} gain={0.12} size={2.6} flat position={[0, 0.01, 0.9]} />
     </Place>
   );
 }
@@ -170,8 +170,8 @@ export function CurtainAlcove({ display, chapter, smoothRef, reduced }: Props) {
     <Place display={display}>
       <Box size={[1.7, 0.95, 0.6]} at={[0, 0.475, 0]} material={m.wood} />
       <Box size={[1.72, 0.03, 0.62]} at={[0, 0.96, 0]} material={m.gold} />
-      <Box size={[1.7, 2.3, 0.05]} at={[0, 2.12, -0.28]} material={m.velvet} />
-      <mesh position={[0, 3.27, -0.27]} material={m.velvet}><circleGeometry args={[0.85, 48, 0, Math.PI]} /></mesh>
+      <Box size={[1.7, 2.3, 0.05]} at={[0, 2.12, -0.28]} material={m.niche} />
+      <mesh position={[0, 3.27, -0.25]} material={m.niche}><circleGeometry args={[0.85, 48, 0, Math.PI]} /></mesh>
       <mesh position={[0, 3.27, -0.15]} material={m.gold}><torusGeometry args={[0.92, 0.045, 12, 64, Math.PI]} /></mesh>
       {[-1, 1].map((s) => (
         <group key={s}>
@@ -192,7 +192,7 @@ export function CurtainAlcove({ display, chapter, smoothRef, reduced }: Props) {
         {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.6, 0.302]} />}
-      <Halo open={open} base={0.08} gain={0.35} size={2.6} flat position={[0, 0.01, 0.9]} />
+      <Halo open={open} base={0.03} gain={0.12} size={2.6} flat position={[0, 0.01, 0.9]} />
     </Place>
   );
 }
@@ -224,7 +224,7 @@ export function Dome({ display, chapter, smoothRef, reduced }: Props) {
 
   return (
     <Place display={display}>
-      <Box size={[1.5, 2.3, 0.05]} at={[0, 1.75, -0.48]} material={m.velvet} />
+      <Box size={[1.5, 2.3, 0.05]} at={[0, 1.75, -0.48]} material={m.niche} />
       {[-1, 1].map((s) => <Box key={`v${s}`} size={[0.04, 2.34, 0.06]} at={[s * 0.76, 1.75, -0.46]} material={m.gold} />)}
       {[-1, 1].map((s) => <Box key={`h${s}`} size={[1.56, 0.04, 0.06]} at={[0, 1.75 + s * 1.17, -0.46]} material={m.gold} />)}
       <Halo open={open} base={0.06} gain={0.28} size={2} position={[0, 1.75, -0.44]} />
@@ -242,7 +242,7 @@ export function Dome({ display, chapter, smoothRef, reduced }: Props) {
         {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.85, 0.32]} />}
-      <Halo open={open} base={0.08} gain={0.4} size={2.4} flat position={[0, 0.01, 0.4]} />
+      <Halo open={open} base={0.03} gain={0.12} size={2.4} flat position={[0, 0.01, 0.4]} />
     </Place>
   );
 }
@@ -301,10 +301,10 @@ export function Drawer({ display, chapter, smoothRef, reduced }: Props) {
         {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.42, 0.432]} />}
-      <Box size={[2.2, 2.4, 0.05]} at={[0, 2.25, -0.5]} material={m.velvet} />
+      <Box size={[2.2, 2.4, 0.05]} at={[0, 2.25, -0.5]} material={m.niche} />
       <Box size={[2.2, 0.05, 0.08]} at={[0, 3.45, -0.48]} material={m.gold} />
       <Halo open={open} base={0.06} gain={0.28} size={2.6} position={[0, 1.8, -0.46]} />
-      <Halo open={open} base={0.08} gain={0.35} size={2.8} flat position={[0, 0.01, 1.1]} />
+      <Halo open={open} base={0.03} gain={0.12} size={2.8} flat position={[0, 0.01, 1.1]} />
     </Place>
   );
 }
@@ -341,10 +341,10 @@ export function TableCase({ display, chapter, smoothRef, reduced }: Props) {
         {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.78, 0.432]} />}
-      <Box size={[1.9, 2.4, 0.05]} at={[0, 2.1, -0.52]} material={m.velvet} />
+      <Box size={[1.9, 2.4, 0.05]} at={[0, 2.1, -0.52]} material={m.niche} />
       <mesh position={[0, 3.3, -0.5]} material={m.gold}><torusGeometry args={[0.95, 0.03, 10, 64, Math.PI]} /></mesh>
       <Halo open={open} base={0.06} gain={0.28} size={2.4} position={[0, 1.7, -0.48]} />
-      <Halo open={open} base={0.08} gain={0.35} size={2.6} flat position={[0, 0.01, 0.8]} />
+      <Halo open={open} base={0.03} gain={0.12} size={2.6} flat position={[0, 0.01, 0.8]} />
     </Place>
   );
 }
@@ -358,10 +358,7 @@ export function Lounge({ display, chapter, smoothRef, reduced }: Props) {
   useEffect(() => () => lamps.dispose(), [lamps]);
   const lid = useRef<THREE.Group>(null);
   const chandelier = useRef<THREE.Group>(null);
-  const sign = useTextTexture([
-    { text: "J H U M A   J E W E L L E R S", font: "500 60px Georgia, serif", color: "#f3d08a", y: 0.42 },
-    { text: "ঝুমা জুয়েলার্স · সিলেট প্লাজা", font: "38px 'Noto Sans Bengali', 'Nirmala UI', 'Bangla Sangam MN', 'Vrinda', sans-serif", color: "#c9a56a", y: 0.78 },
-  ], 1024, 200, "#0b0806");
+  const logo = useLogoTexture();
 
   useFrame(({ clock }, delta) => {
     const o = open.current;
@@ -374,15 +371,17 @@ export function Lounge({ display, chapter, smoothRef, reduced }: Props) {
 
   return (
     <Place display={display}>
-      <Box size={[3.4, 0.7, 0.05]} at={[0, 2.5, -2.93]} material={m.gold} />
-      <mesh position={[0, 2.5, -2.9]}><planeGeometry args={[3.3, 0.645]} /><meshBasicMaterial map={sign} toneMapped={false} /></mesh>
+      {/* the round Jhuma sign on the fluted wall, as at the salon */}
+      <mesh position={[0, 2.35, -2.86]} material={m.gold}><torusGeometry args={[0.92, 0.05, 16, 96]} /></mesh>
+      <mesh position={[0, 2.35, -2.835]}><circleGeometry args={[0.88, 96]} /><meshBasicMaterial map={logo} toneMapped={false} /></mesh>
+      <Halo open={open} base={0.08} gain={0.1} size={3} position={[0, 2.35, -2.88]} color="#ffd690" />
       {/* settee */}
       <group position={[0, 0, -1.55]}>
-        <Box size={[2.4, 0.3, 0.86]} at={[0, 0.3, 0]} material={m.velvet} />
-        <Box size={[2.3, 0.12, 0.8]} at={[0, 0.5, 0.02]} material={m.velvet} />
-        <Box size={[2.4, 0.72, 0.18]} at={[0, 0.8, -0.36]} material={m.velvet} />
+        <Box size={[2.4, 0.3, 0.86]} at={[0, 0.3, 0]} material={m.taupe} />
+        <Box size={[2.3, 0.12, 0.8]} at={[0, 0.5, 0.02]} material={m.taupe} />
+        <Box size={[2.4, 0.72, 0.18]} at={[0, 0.8, -0.36]} material={m.taupe} />
         <Box size={[2.44, 0.04, 0.22]} at={[0, 1.17, -0.36]} material={m.gold} />
-        {[-1, 1].map((s) => <Box key={`a${s}`} size={[0.18, 0.62, 0.86]} at={[s * 1.25, 0.46, 0]} material={m.velvet} />)}
+        {[-1, 1].map((s) => <Box key={`a${s}`} size={[0.18, 0.62, 0.86]} at={[s * 1.25, 0.46, 0]} material={m.taupe} />)}
         {[-1, 1].flatMap((x) => [-1, 1].map((z) => <Box key={`l${x}${z}`} size={[0.05, 0.16, 0.05]} at={[x * 1.15, 0.08, z * 0.36]} material={m.gold} />))}
       </group>
       {/* table and the gift box */}
@@ -423,9 +422,45 @@ export function Lounge({ display, chapter, smoothRef, reduced }: Props) {
         <mesh position={[0, -0.55, 0]} material={lamps}><sphereGeometry args={[0.06, 16, 12]} /></mesh>
         <Halo open={open} base={0.25} gain={0.5} size={3} position={[0, 0, 0.1]} />
       </group>
-      <Halo open={open} base={0.12} gain={0.4} size={5} flat position={[0, 0.01, -0.4]} />
+      <Halo open={open} base={0.03} gain={0.1} size={5} flat position={[0, 0.01, -0.4]} />
     </Place>
   );
+}
+
+/** The Jhuma roundel: interlaced J J over the name, gold on lit cream. */
+function useLogoTexture() {
+  const texture = useMemo(() => {
+    const size = 1024;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = size;
+    const c = canvas.getContext("2d")!;
+    const glow = c.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    glow.addColorStop(0, "#fffaf0");
+    glow.addColorStop(1, "#efe2c8");
+    c.fillStyle = glow;
+    c.fillRect(0, 0, size, size);
+    const gold = c.createLinearGradient(0, 200, 0, 820);
+    gold.addColorStop(0, "#d8a64e");
+    gold.addColorStop(0.5, "#8a5a1c");
+    gold.addColorStop(1, "#c08a3a");
+    c.fillStyle = gold;
+    c.textAlign = "center";
+    c.textBaseline = "alphabetic";
+    c.font = "italic 330px Georgia, 'Times New Roman', serif";
+    c.fillText("J", size / 2 - 70, 560);
+    c.fillText("J", size / 2 + 70, 560);
+    c.font = "600 150px Georgia, 'Times New Roman', serif";
+    c.fillText("JHUMA", size / 2, 735);
+    c.font = "500 66px Georgia, 'Times New Roman', serif";
+    c.fillText("J E W E L L E R S", size / 2, 830);
+    c.fillRect(size / 2 - 220, 760, 440, 3);
+    const map = new THREE.CanvasTexture(canvas);
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.anisotropy = 8;
+    return map;
+  }, []);
+  useEffect(() => () => texture.dispose(), [texture]);
+  return texture;
 }
 
 const BY_OPENING = { box: JewelBox, cabinet: Cabinet, curtain: CurtainAlcove, dome: Dome, drawer: Drawer, case: TableCase, lounge: Lounge } as const;

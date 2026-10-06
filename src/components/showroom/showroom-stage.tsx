@@ -11,7 +11,7 @@ import { DisplayFor } from "./displays";
 import { Hall } from "./hall";
 import { MaterialsProvider } from "./kit";
 
-type Refs = { sectionRef: RefObject<number>; smoothRef: RefObject<number>; menuRef: RefObject<boolean>; reduced: boolean };
+type Refs = { sectionRef: RefObject<number>; smoothRef: RefObject<number>; menuRef: RefObject<boolean>; reduced: boolean; initial?: number };
 
 function LoadBridge({ onProgress }: { onProgress: (value: number) => void }) {
   const { progress } = useProgress();
@@ -27,8 +27,8 @@ const v3 = (value: readonly number[]) => new THREE.Vector3(value[0], value[1], v
  * straight between the two shots; the view turns from one display, down the length of the hall in
  * the direction of travel, and onto the next, so crossing the hall is a sweep rather than a whip-pan.
  */
-function Rig({ sectionRef, smoothRef, menuRef, reduced }: Refs) {
-  const flight = useRef({ from: 0, to: 0, start: 0, duration: 0 });
+function Rig({ sectionRef, smoothRef, menuRef, reduced, initial = 0 }: Refs) {
+  const flight = useRef({ from: initial, to: initial, start: 0, duration: 0 });
   const now = useRef<{ position: THREE.Vector3; dir: THREE.Vector3 } | null>(null);
   const scratch = useRef({ position: new THREE.Vector3(), dir: new THREE.Vector3(), a: new THREE.Vector3(), b: new THREE.Vector3(), travel: new THREE.Vector3(), side: new THREE.Vector3(), look: new THREE.Vector3() });
 
@@ -116,9 +116,9 @@ function FollowLight({ smoothRef, reduced }: { smoothRef: RefObject<number>; red
     const settled = 1 - Math.sin(Math.PI * (s - Math.floor(s))) * 0.55;
     spot.current?.position.set(...key);
     aim.position.set(...focus);
-    if (spot.current) spot.current.intensity = 28 * settled;
+    if (spot.current) spot.current.intensity = 13 * settled;
     fill.current?.position.set(focus[0], focus[1] + 0.4, focus[2]);
-    if (fill.current) fill.current.intensity = 3.5 * settled;
+    if (fill.current) fill.current.intensity = 2.2 * settled;
     dust.current?.position.set(...focus);
   });
   return (
@@ -136,14 +136,14 @@ function FollowLight({ smoothRef, reduced }: { smoothRef: RefObject<number>; red
 function Scene({ fancy, onProgress, ...refs }: Refs & { fancy: boolean; onProgress: (value: number) => void }) {
   return (
     <>
-      <color attach="background" args={["#060509"]} />
-      <fog attach="fog" args={["#07070c", 9, 30]} />
+      <color attach="background" args={["#1a120b"]} />
+      <fog attach="fog" args={["#24180e", 16, 52]} />
       <LoadBridge onProgress={onProgress} />
       <Rig {...refs} />
       <Studio neutral />
-      <ambientLight intensity={0.16} color="#ffe6c4" />
-      <hemisphereLight args={["#ffdfa8", "#0a1640", 0.32]} />
-      <directionalLight position={[2, 6, 8]} intensity={0.55} color="#fff0d8" />
+      <ambientLight intensity={0.38} color="#ffeccf" />
+      <hemisphereLight args={["#fff1d8", "#6e4a26", 0.5]} />
+      <directionalLight position={[2, 6, 8]} intensity={0.8} color="#fff0d8" />
       <FollowLight smoothRef={refs.smoothRef} reduced={refs.reduced} />
       <MaterialsProvider>
         <Hall fancy={fancy} />
@@ -160,8 +160,8 @@ function Scene({ fancy, onProgress, ...refs }: Refs & { fancy: boolean; onProgre
   );
 }
 
-export default function ShowroomStage({ fancy, paused, onProgress, ...refs }: Omit<Refs, "smoothRef"> & { fancy: boolean; paused: boolean; onProgress: (value: number) => void }) {
-  const smoothRef = useRef(0);
+export default function ShowroomStage({ fancy, paused, onProgress, initial = 0, ...refs }: Omit<Refs, "smoothRef"> & { fancy: boolean; paused: boolean; onProgress: (value: number) => void; initial?: number }) {
+  const smoothRef = useRef(initial);
   const [lowRes, setLowRes] = useState(false);
   const low = !fancy || lowRes;
   return (
@@ -173,11 +173,11 @@ export default function ShowroomStage({ fancy, paused, onProgress, ...refs }: Om
       camera={{ position: [0, 1.8, 15.6], fov: 30, near: 0.05, far: 70 }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.15;
+        gl.toneMappingExposure = 1.05;
       }}
     >
       {fancy ? <PerformanceMonitor onDecline={() => setLowRes(true)} flipflops={2} onFallback={() => setLowRes(true)} /> : null}
-      <Scene fancy={fancy} onProgress={onProgress} smoothRef={smoothRef} {...refs} />
+      <Scene fancy={fancy} onProgress={onProgress} smoothRef={smoothRef} initial={initial} {...refs} />
     </Canvas>
   );
 }

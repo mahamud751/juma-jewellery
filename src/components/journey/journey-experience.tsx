@@ -13,15 +13,17 @@ const JourneyStage = dynamic(() => import("./journey-stage"), { ssr: false });
 type Props = {
   /** Stop the walk early, at this stop. */
   end?: number;
-  /** Called when the visitor keeps going past `end`. */
-  onEnd?: () => void;
-  /** Open at the last stop (coming back from what follows). */
-  startAtEnd?: boolean;
+  /** Called when the visitor keeps going past `end`, or picks a later step on the rail. */
+  onEnd?: (step?: number) => void;
+  /** The stop the walk opens on (coming back from what follows). */
+  startAt?: number;
+  /** Rail labels for the steps that follow the walk. */
+  after?: string[];
   /** Steps in the whole home page, for the counter. */
   total?: number;
 };
 
-export function JourneyExperience({ end, onEnd, startAtEnd = false, total }: Props = {}) {
+export function JourneyExperience({ end, onEnd, startAt = 0, after = [], total }: Props = {}) {
   const last = Math.min(LAST_STOP, end ?? LAST_STOP);
   const stops = STOPS.slice(0, last + 1);
   const onEndRef = useRef(onEnd);
@@ -45,7 +47,11 @@ export function JourneyExperience({ end, onEnd, startAtEnd = false, total }: Pro
 
   useEffect(() => {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-    window.scrollTo(0, startAtEnd ? document.documentElement.scrollHeight : 0);
+    {
+      const element = root.current;
+      const travel = element ? Math.max(1, element.offsetHeight - innerHeight) : 0;
+      window.scrollTo(0, Math.min(last, Math.max(0, startAt)) / last * travel);
+    }
     const media = matchMedia("(prefers-reduced-motion: reduce)");
     const preference = () => setReduced(media.matches);
     preference();
@@ -63,7 +69,7 @@ export function JourneyExperience({ end, onEnd, startAtEnd = false, total }: Pro
         setLooking(false);
       }
       setActive(Math.round(p));
-      element.style.setProperty("--journey", String(p / last));
+      element.style.setProperty("--journey", String(p / Math.max(1, (total ?? last + 1) - 1)));
       element.querySelectorAll<HTMLElement>(".jr-copy").forEach((panel, index) => {
         const distance = p - index;
         const shown = 1 - smooth(.16, .4, Math.abs(distance));
@@ -83,7 +89,7 @@ export function JourneyExperience({ end, onEnd, startAtEnd = false, total }: Pro
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
     };
-  }, [startAtEnd, last]);
+  }, [startAt, last, total]);
 
   // At the last stop, a further push down (wheel, swipe or key) hands over to what follows. The
   // push only counts once the walk has rested there briefly, so the tail of the scroll that
@@ -226,6 +232,9 @@ export function JourneyExperience({ end, onEnd, startAtEnd = false, total }: Pro
     <nav className="jr-rail" aria-label="Journey stops">
       {stops.map((item, index) => <button key={item.label} onClick={() => visit(index)} aria-label={item.label} aria-current={active === index ? "step" : undefined} data-piece={item.piece !== undefined}>
         <span>{item.label}</span><i />
+      </button>)}
+      {after.map((label, index) => <button key={`a${label}`} onClick={() => onEnd?.(index)} aria-label={label}>
+        <span>{label}</span><i />
       </button>)}
     </nav>
 

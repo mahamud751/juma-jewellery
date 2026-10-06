@@ -7,18 +7,78 @@ import { reliefFrom } from "@/components/relief-photo";
 
 /* ───────────────────────── Materials ───────────────────────── */
 
+/* The salon's palette, taken from the photographs of steps 1–6: honey wood in vertical flutes,
+   cream lit niches, polished gold, and royal blue velvet. */
+
+/** Vertical flutes: each a rounded slat, lighter at its crown. Tiles across the width. */
+export function fluteTexture(slats: number) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 4;
+  const context = canvas.getContext("2d")!;
+  const gradient = context.createLinearGradient(0, 0, 64, 0);
+  gradient.addColorStop(0, "#4a2a12");
+  gradient.addColorStop(0.12, "#8a5426");
+  gradient.addColorStop(0.5, "#c58a4c");
+  gradient.addColorStop(0.88, "#8a5426");
+  gradient.addColorStop(1, "#4a2a12");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 64, 4);
+  const map = new THREE.CanvasTexture(canvas);
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.wrapS = map.wrapT = THREE.RepeatWrapping;
+  map.repeat.set(slats, 1);
+  map.anisotropy = 8;
+  return map;
+}
+
+/** The salon's hexagon jali: honey wood rings on transparent ground. Tiles both ways. */
+export function latticeTexture(repeatX: number, repeatY: number) {
+  const r = 30;
+  const w = Math.sqrt(3) * r;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(w * 2);
+  canvas.height = r * 3 * 2;
+  const context = canvas.getContext("2d")!;
+  context.strokeStyle = "#9a6230";
+  context.lineWidth = 9;
+  context.lineJoin = "round";
+  for (let row = -1; row <= 4; row++) {
+    for (let col = -1; col <= 3; col++) {
+      const cx = col * w + (row % 2 ? w / 2 : 0);
+      const cy = row * r * 1.5;
+      context.beginPath();
+      for (let k = 0; k <= 6; k++) {
+        const a = Math.PI / 6 + (k * Math.PI) / 3;
+        const x = cx + Math.cos(a) * (r - 6);
+        const y = cy + Math.sin(a) * (r - 6);
+        if (k) context.lineTo(x, y);
+        else context.moveTo(x, y);
+      }
+      context.stroke();
+    }
+  }
+  const map = new THREE.CanvasTexture(canvas);
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.wrapS = map.wrapT = THREE.RepeatWrapping;
+  map.repeat.set(repeatX, repeatY);
+  map.anisotropy = 8;
+  return map;
+}
+
 function makeMaterials() {
   return {
-    wood: new THREE.MeshStandardMaterial({ color: "#3d2414", roughness: 0.5, metalness: 0.1 }),
-    woodDark: new THREE.MeshStandardMaterial({ color: "#1f120a", roughness: 0.45, metalness: 0.1 }),
-    gold: new THREE.MeshStandardMaterial({ color: "#e4b95e", roughness: 0.22, metalness: 1, envMapIntensity: 1.35 }),
-    velvet: new THREE.MeshPhysicalMaterial({ color: "#071440", roughness: 0.97, sheen: 0.35, sheenColor: new THREE.Color("#2a46a8"), sheenRoughness: 0.55 }),
-    wall: new THREE.MeshPhysicalMaterial({ color: "#0a173f", roughness: 0.95, sheen: 0.7, sheenColor: new THREE.Color("#2f4cb0"), sheenRoughness: 0.6 }),
-    cream: new THREE.MeshStandardMaterial({ color: "#c9b48e", roughness: 0.7, metalness: 0.05 }),
-    glass: new THREE.MeshPhysicalMaterial({ color: "#fff6e4", roughness: 0.04, metalness: 0.1, transparent: true, opacity: 0.06, envMapIntensity: 0.8, depthWrite: false, side: THREE.DoubleSide }),
-    led: new THREE.MeshBasicMaterial({ color: new THREE.Color(2.4, 1.75, 0.95), toneMapped: false }),
-    carpet: new THREE.MeshStandardMaterial({ color: "#5a0c13", roughness: 0.95 }),
-    curtain: new THREE.MeshPhysicalMaterial({ color: "#3a0610", roughness: 0.9, sheen: 0.8, sheenColor: new THREE.Color("#a3283f"), sheenRoughness: 0.45, side: THREE.DoubleSide }),
+    wood: new THREE.MeshStandardMaterial({ color: "#9a5f2c", roughness: 0.42, metalness: 0.08 }),
+    woodDark: new THREE.MeshStandardMaterial({ color: "#5e3415", roughness: 0.4, metalness: 0.08 }),
+    gold: new THREE.MeshStandardMaterial({ color: "#e8bd62", roughness: 0.2, metalness: 1, envMapIntensity: 1.4 }),
+    velvet: new THREE.MeshPhysicalMaterial({ color: "#0a2596", roughness: 0.95, sheen: 0.35, sheenColor: new THREE.Color("#2a5ee6"), sheenRoughness: 0.5 }),
+    cream: new THREE.MeshStandardMaterial({ color: "#efe5d3", roughness: 0.55, metalness: 0.02 }),
+    /** The inside of a lit niche: cream, glowing from hidden strips. */
+    niche: new THREE.MeshStandardMaterial({ color: "#d9c8aa", emissive: new THREE.Color("#ffd9a0"), emissiveIntensity: 0.14, roughness: 0.75 }),
+    glass: new THREE.MeshPhysicalMaterial({ color: "#fff6e4", roughness: 0.04, metalness: 0.1, transparent: true, opacity: 0.08, envMapIntensity: 1, depthWrite: false, side: THREE.DoubleSide }),
+    led: new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.85, 1.35), toneMapped: false }),
+    curtain: new THREE.MeshPhysicalMaterial({ color: "#0f2580", roughness: 0.92, sheen: 0.7, sheenColor: new THREE.Color("#4a6ee0"), sheenRoughness: 0.45, side: THREE.DoubleSide }),
+    taupe: new THREE.MeshPhysicalMaterial({ color: "#6f645c", roughness: 0.95, sheen: 0.4, sheenColor: new THREE.Color("#b8a99c"), sheenRoughness: 0.5 }),
   };
 }
 
