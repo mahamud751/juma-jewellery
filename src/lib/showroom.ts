@@ -13,6 +13,8 @@ export type Display = {
   opening: Opening;
   /** The salon photograph shown in it, and its height in metres. */
   src?: string;
+  /** The modelled 3D piece that turns in front of the photograph: an index into BUILDERS in journey/gold. */
+  model?: number;
   height: number;
   /** Floor point of the display and the way it faces (0 faces +z). */
   at: [number, number];
@@ -51,14 +53,14 @@ const WALL_X = 3.15;
 
 /** One per chapter after the opening shot: DISPLAYS[i] belongs to chapter i + 1. */
 export const DISPLAYS: Display[] = [
-  { opening: "box", src: "/media/full/IMG_7126.jpg", height: 1.02, at: [-1.2, 6], yaw: 0.35, focusY: 1.86, focusZ: 0, side: 1, distance: 4.9, plaque: ["Floral Har", "ফ্লোরাল হার"] },
-  { opening: "cabinet", src: "/media/hero/chains.jpg", height: 1.3, at: [-WALL_X, 0], yaw: LEFT, focusY: 1.72, focusZ: 0.5, side: -1, plaque: ["The Chain Boards", "চেইন"] },
-  { opening: "curtain", src: "/media/full/IMG_7121.jpg", height: 1.02, at: [WALL_X, -5], yaw: RIGHT, focusY: 1.86, focusZ: 0.42, side: 1, distance: 4.9, plaque: ["Lotus Cascade", "পদ্ম হার"] },
-  { opening: "dome", src: "/media/hero/jhumka.jpg", height: 0.86, at: [-WALL_X + 0.15, -10], yaw: LEFT, focusY: 1.78, focusZ: 0.3, side: -1, plaque: ["Bell Jhumka", "ঝুমকা"] },
-  { opening: "cabinet", src: "/media/hero/fan.jpg", height: 1.4, at: [WALL_X, -15], yaw: RIGHT, focusY: 1.74, focusZ: 0.5, side: 1, plaque: ["Fan Pendant", "পাখা লকেট"] },
-  { opening: "curtain", src: "/media/full/IMG_7123.jpg", height: 1.02, at: [-WALL_X, -20], yaw: LEFT, focusY: 1.86, focusZ: 0.42, side: -1, distance: 4.9, plaque: ["Under the Arch", "খিলানের নিচে"] },
-  { opening: "drawer", src: "/media/hero/rings.jpg", height: 0.86, at: [WALL_X - 0.1, -25], yaw: RIGHT, focusY: 1.5, focusZ: 0.86, side: 1, distance: 4.6, plaque: ["Gold Rings", "সোনার আংটি"] },
-  { opening: "case", src: "/media/full/IMG_7131.jpg", height: 0.9, at: [-WALL_X + 0.1, -30], yaw: LEFT, focusY: 1.6, focusZ: 0.42, side: -1, distance: 4.4, plaque: ["The Earring Trays", "কানের দুল"] },
+  { opening: "box", src: "/media/full/IMG_7126.jpg", model: 1, height: 1.02, at: [-1.2, 6], yaw: 0.35, focusY: 1.86, focusZ: 0, side: 1, distance: 4.9, plaque: ["Floral Har", "ফ্লোরাল হার"] },
+  { opening: "cabinet", src: "/media/hero/chains.jpg", model: 0, height: 1.3, at: [-WALL_X, 0], yaw: LEFT, focusY: 1.72, focusZ: 0.5, side: -1, plaque: ["The Chain Boards", "চেইন"] },
+  { opening: "curtain", src: "/media/full/IMG_7121.jpg", model: 1, height: 1.02, at: [WALL_X, -5], yaw: RIGHT, focusY: 1.86, focusZ: 0.42, side: 1, distance: 4.9, plaque: ["Lotus Cascade", "পদ্ম হার"] },
+  { opening: "dome", src: "/media/hero/jhumka.jpg", model: 2, height: 0.86, at: [-WALL_X + 0.15, -10], yaw: LEFT, focusY: 1.78, focusZ: 0.3, side: -1, plaque: ["Bell Jhumka", "ঝুমকা"] },
+  { opening: "cabinet", src: "/media/hero/fan.jpg", model: 0, height: 1.4, at: [WALL_X, -15], yaw: RIGHT, focusY: 1.74, focusZ: 0.5, side: 1, plaque: ["Fan Pendant", "পাখা লকেট"] },
+  { opening: "curtain", src: "/media/full/IMG_7123.jpg", model: 3, height: 1.02, at: [-WALL_X, -20], yaw: LEFT, focusY: 1.86, focusZ: 0.42, side: -1, distance: 4.9, plaque: ["Under the Arch", "খিলানের নিচে"] },
+  { opening: "drawer", src: "/media/hero/rings.jpg", model: 4, height: 0.86, at: [WALL_X - 0.1, -25], yaw: RIGHT, focusY: 1.5, focusZ: 0.86, side: 1, distance: 4.6, plaque: ["Gold Rings", "সোনার আংটি"] },
+  { opening: "case", src: "/media/full/IMG_7131.jpg", model: 2, height: 0.9, at: [-WALL_X + 0.1, -30], yaw: LEFT, focusY: 1.6, focusZ: 0.42, side: -1, distance: 4.4, plaque: ["The Earring Trays", "কানের দুল"] },
   { opening: "lounge", height: 1.4, at: [0, -37.6], yaw: 0, focusY: 1.3, focusZ: -0.6, side: 1, distance: 6.6, eye: 2.1 },
 ];
 

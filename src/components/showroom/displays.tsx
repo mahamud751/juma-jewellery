@@ -4,13 +4,31 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from "react";
 import * as THREE from "three";
 import type { Display } from "@/lib/showroom";
-import { Halo, PiecePhoto, Plaque, span, useMaterials, useOpening, useTextTexture } from "./kit";
+import { GoldPiece, Halo, PiecePhoto, Plaque, span, useMaterials, useOpening, useTextTexture } from "./kit";
 
 type Props = { display: Display; chapter: number; smoothRef: RefObject<number>; reduced: boolean };
 
 /** Places a display on its floor point, turned to face the hall. */
 function Place({ display, children }: { display: Display; children: ReactNode }) {
   return <group position={[display.at[0], 0, display.at[1]]} rotation={[0, display.yaw, 0]}>{children}</group>;
+}
+
+/**
+ * What comes out of a display: the modelled gold piece turning in the light, with the salon photograph
+ * of the real one glowing behind it. A display with no model shows the photograph alone, as before.
+ */
+function Piece({ display, open, chapter }: { display: Display; open: RefObject<number>; chapter: number }) {
+  if (display.model === undefined) return display.src ? <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} /> : null;
+  return (
+    <>
+      <GoldPiece model={display.model} height={display.height} open={open} chapter={chapter} />
+      {display.src && (
+        <group position={[0, 0.04, -0.62]} scale={0.92}>
+          <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} bright={0.62} />
+        </group>
+      )}
+    </>
+  );
 }
 
 /** The piece's idle life once it is out: a slow sway, and a turn toward the pointer. */
@@ -64,7 +82,7 @@ export function JewelBox({ display, chapter, smoothRef, reduced }: Props) {
         <mesh position={[0, 0.102, 0.37]} rotation={[-Math.PI / 2, 0, 0]} material={m.gold}><ringGeometry args={[0.2, 0.22, 48]} /></mesh>
       </group>
       <group ref={piece} visible={false}>
-        {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
+        <Piece display={display} open={open} chapter={chapter} />
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.81, 0.375]} />}
       <Halo open={open} base={0.03} gain={0.12} size={3.2} flat position={[0, 0.01, 0.3]} />
@@ -121,7 +139,7 @@ export function Cabinet({ display, chapter, smoothRef, reduced }: Props) {
       {leaf(-1)}
       {leaf(1)}
       <group ref={piece} position={[0, display.focusY, -0.12]}>
-        {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
+        <Piece display={display} open={open} chapter={chapter} />
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.55, 0.352]} />}
       <Halo open={open} base={0.03} gain={0.12} size={2.6} flat position={[0, 0.01, 0.9]} />
@@ -189,7 +207,7 @@ export function CurtainAlcove({ display, chapter, smoothRef, reduced }: Props) {
         <mesh geometry={curtain} position={[-0.475, 2.1, 0]} material={m.curtain} />
       </group>
       <group ref={piece} position={[0, display.focusY, -0.12]}>
-        {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
+        <Piece display={display} open={open} chapter={chapter} />
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.6, 0.302]} />}
       <Halo open={open} base={0.03} gain={0.12} size={2.6} flat position={[0, 0.01, 0.9]} />
@@ -239,7 +257,7 @@ export function Dome({ display, chapter, smoothRef, reduced }: Props) {
         <mesh position={[0, 1.44, 0]} material={m.gold}><sphereGeometry args={[0.035, 16, 12]} /></mesh>
       </group>
       <group ref={piece} position={[0, rest, 0]}>
-        {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
+        <Piece display={display} open={open} chapter={chapter} />
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.85, 0.32]} />}
       <Halo open={open} base={0.03} gain={0.12} size={2.4} flat position={[0, 0.01, 0.4]} />
@@ -298,7 +316,7 @@ export function Drawer({ display, chapter, smoothRef, reduced }: Props) {
         <Halo open={open} base={0} gain={0.55} size={1.8} flat position={[0, 0.9, 0.05]} />
       </group>
       <group ref={piece} visible={false}>
-        {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
+        <Piece display={display} open={open} chapter={chapter} />
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.42, 0.432]} />}
       <Box size={[2.2, 2.4, 0.05]} at={[0, 2.25, -0.5]} material={m.niche} />
@@ -338,7 +356,7 @@ export function TableCase({ display, chapter, smoothRef, reduced }: Props) {
         {[0, 0.8].map((z) => <Box key={`lz${z}`} size={[1.52, 0.025, 0.025]} at={[0, 0, z]} material={m.gold} />)}
       </group>
       <group ref={piece}>
-        {display.src && <PiecePhoto src={display.src} height={display.height} open={open} seed={chapter} />}
+        <Piece display={display} open={open} chapter={chapter} />
       </group>
       {display.plaque && <Plaque name={display.plaque[0]} bengali={display.plaque[1]} position={[0, 0.78, 0.432]} />}
       <Box size={[1.9, 2.4, 0.05]} at={[0, 2.1, -0.52]} material={m.niche} />

@@ -3,6 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import * as THREE from "three";
+import { BUILDERS, type PieceGeometry } from "@/components/journey/gold";
 import { reliefFrom } from "@/components/relief-photo";
 
 /* ───────────────────────── Materials ───────────────────────── */
@@ -78,6 +79,7 @@ function makeMaterials() {
     glass: new THREE.MeshPhysicalMaterial({ color: "#fff6e4", roughness: 0.04, metalness: 0.1, transparent: true, opacity: 0.08, envMapIntensity: 1, depthWrite: false, side: THREE.DoubleSide }),
     led: new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.85, 1.35), toneMapped: false }),
     curtain: new THREE.MeshPhysicalMaterial({ color: "#0f2580", roughness: 0.92, sheen: 0.7, sheenColor: new THREE.Color("#4a6ee0"), sheenRoughness: 0.45, side: THREE.DoubleSide }),
+    ruby: new THREE.MeshPhysicalMaterial({ color: "#a3001c", roughness: 0.06, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 2.2, sheen: 0.4, sheenColor: new THREE.Color("#ff4a5e") }),
     taupe: new THREE.MeshPhysicalMaterial({ color: "#6f645c", roughness: 0.95, sheen: 0.4, sheenColor: new THREE.Color("#b8a99c"), sheenRoughness: 0.5 }),
   };
 }
@@ -246,7 +248,7 @@ type Loaded = { geometry: THREE.BufferGeometry; texture: THREE.Texture };
  * Its edges melt into the case, it brightens as the display opens, and a slow band of light
  * runs across the gold.
  */
-export function PiecePhoto({ src, height, open, seed = 0 }: { src: string; height: number; open: RefObject<number>; seed?: number }) {
+export function PiecePhoto({ src, height, open, seed = 0, bright = 1 }: { src: string; height: number; open: RefObject<number>; seed?: number; bright?: number }) {
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const material = useRef<THREE.ShaderMaterial>(null);
   const uniforms = useMemo(() => THREE.UniformsUtils.merge([
@@ -278,7 +280,7 @@ export function PiecePhoto({ src, height, open, seed = 0 }: { src: string; heigh
     if (!u || !loaded) return;
     const o = open.current ?? 0;
     u.map.value = loaded.texture;
-    u.uBright.value = 0.42 + 0.58 * o;
+    u.uBright.value = (0.42 + 0.58 * o) * bright;
     u.uGlint.value = 0.95 * o;
     u.uSweep.value = -0.5 + ((clock.elapsedTime * 0.24 + seed * 0.37) % 2.1);
   });
@@ -288,5 +290,55 @@ export function PiecePhoto({ src, height, open, seed = 0 }: { src: string; heigh
     <mesh geometry={loaded.geometry}>
       <shaderMaterial ref={material} uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} transparent fog toneMapped={false} />
     </mesh>
+  );
+}
+
+/* ───────────────────────── The modelled piece ───────────────────────── */
+
+/** Each piece is built once and kept: the same model can sit in two displays, and the hall remounts. */
+const built = new Map<number, PieceGeometry>();
+function pieceGeometry(model: number) {
+  let geometry = built.get(model);
+  if (!geometry) built.set(model, (geometry = BUILDERS[model]()));
+  return geometry;
+}
+
+/**
+ * A modelled gold piece on a turntable, as on GRAIR: built when the camera first comes near its
+ * display, it turns slowly while the display is open and leans toward the pointer.
+ */
+export function GoldPiece({ model, height, open, chapter }: { model: number; height: number; open: RefObject<number>; chapter: number }) {
+  const m = useMaterials();
+  const [geometry, setGeometry] = useState<PieceGeometry | null>(null);
+  const turn = useRef<THREE.Group>(null);
+  const angle = useRef(chapter * 0.9);
+
+  // Build in idle time, one display after another, so no flight stalls on it.
+  useEffect(() => {
+    const build = () => setGeometry(pieceGeometry(model));
+    if (typeof requestIdleCallback === "undefined") {
+      const timer = setTimeout(build, 300 * chapter);
+      return () => clearTimeout(timer);
+    }
+    const id = requestIdleCallback(build, { timeout: 600 * chapter });
+    return () => cancelIdleCallback(id);
+  }, [model, chapter]);
+
+  useFrame(({ pointer }, delta) => {
+    const o = open.current ?? 0;
+    if (!geometry && o > 0.001) setGeometry(pieceGeometry(model));
+    if (!turn.current) return;
+    angle.current += Math.min(delta, 0.05) * 0.38 * o;
+    turn.current.rotation.y = angle.current + pointer.x * 0.35 * o;
+    turn.current.rotation.x = -pointer.y * 0.12 * o;
+  });
+
+  if (!geometry) return null;
+  return (
+    <group ref={turn} scale={height / geometry.height}>
+      <mesh geometry={geometry.gold} material={m.gold} />
+      {geometry.stone && <mesh geometry={geometry.stone} material={m.ruby} />}
+      {geometry.velvet && <mesh geometry={geometry.velvet} material={m.velvet} />}
+    </group>
   );
 }
