@@ -290,7 +290,7 @@ function isolateGold(image: HTMLImageElement) {
  * The salon photograph, bowed into a shallow relief. Bright gold lifts off the
  * velvet so a turn shows the real piece, not a stand-in model.
  */
-function reliefFrom(image: CanvasImageSource, width: number, height: number, flat = false) {
+export function reliefFrom(image: CanvasImageSource, width: number, height: number, flat = false) {
   if (flat) return new THREE.PlaneGeometry(width, height, 1, 1);
   const cols = 88;
   const rows = 64;

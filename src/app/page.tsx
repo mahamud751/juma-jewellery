@@ -38,7 +38,7 @@ export default function HomePage() {
 
   return (
     <>
-      <JourneyExperience />
+      <JourneyExperience end={7} />
       <div id="house" className="site home-site">
         <div className="grain" aria-hidden="true" />
         <SiteHeader />

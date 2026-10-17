@@ -3,18 +3,31 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { DOOR_STOP, FLOATING_PIECES, JOURNEY_STEP, MALL, PIECES, STOPS, photoUrl, smooth } from "@/lib/journey";
+import { DOOR_STOP, FLOATING_PIECES, JOURNEY_STEP, LAST_STOP, MALL, PIECES, STOPS, photoUrl, smooth } from "@/lib/journey";
 import type { Spin } from "./showcase";
 import type { MallLook } from "./mall-passage";
 import "@/app/journey.css";
 
 const JourneyStage = dynamic(() => import("./journey-stage"), { ssr: false });
 
-/** The opening walk is eight stops. The shop begins after the last one. */
-const WALK = STOPS.slice(0, 8);
-const END = WALK.length - 1;
+type Props = {
+  /** Stop the walk early, at this stop. */
+  end?: number;
+  /** Called when the visitor keeps going past `end`, or picks a later step on the rail. */
+  onEnd?: (step?: number) => void;
+  /** The stop the walk opens on (coming back from what follows). */
+  startAt?: number;
+  /** Rail labels for the steps that follow the walk. */
+  after?: string[];
+  /** Steps in the whole home page, for the counter. */
+  total?: number;
+};
 
-export function JourneyExperience() {
+export function JourneyExperience({ end, onEnd, startAt = 0, after = [], total }: Props = {}) {
+  const last = Math.min(LAST_STOP, end ?? LAST_STOP);
+  const stops = STOPS.slice(0, last + 1);
+  const onEndRef = useRef(onEnd);
+  useEffect(() => { onEndRef.current = onEnd; }, [onEnd]);
   const root = useRef<HTMLDivElement>(null);
   const progress = useRef(0);
   const spin = useRef<Spin>({ angle: 0, velocity: 0 });
@@ -26,7 +39,7 @@ export function JourneyExperience() {
   const [ready, setReady] = useState(false);
   const [loaded, setLoaded] = useState(0);
   const [released, setReleased] = useState(false);
-  const stop = WALK[Math.min(active, END)];
+  const stop = stops[Math.min(active, last)];
   const piece = stop.piece === undefined ? undefined : PIECES[stop.piece];
   const floating = stop.piece !== undefined && FLOATING_PIECES.has(stop.piece);
 
@@ -36,7 +49,11 @@ export function JourneyExperience() {
 
   useEffect(() => {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-    window.scrollTo(0, 0);
+    {
+      const element = root.current;
+      const travel = element ? Math.max(1, element.offsetHeight - innerHeight) : 0;
+      window.scrollTo(0, Math.min(last, Math.max(0, startAt)) / last * travel);
+    }
     const media = matchMedia("(prefers-reduced-motion: reduce)");
     const preference = () => setReduced(media.matches);
     preference();
@@ -47,7 +64,7 @@ export function JourneyExperience() {
       const element = root.current;
       if (!element) return;
       const travel = Math.max(1, element.offsetHeight - innerHeight);
-      const p = Math.min(END, Math.max(0, scrollY / travel * END));
+      const p = Math.min(last, Math.max(0, scrollY / travel * last));
       progress.current = p;
       setReleased(scrollY > travel + 24);
       if (p < .8 || p > 1.4) {
@@ -55,7 +72,7 @@ export function JourneyExperience() {
         setLooking(false);
       }
       setActive(Math.round(p));
-      element.style.setProperty("--journey", String(p / END));
+      element.style.setProperty("--journey", String(p / Math.max(1, (total ?? last + 1) - 1)));
       element.querySelectorAll<HTMLElement>(".jr-copy").forEach((panel, index) => {
         const distance = p - index;
         const shown = 1 - smooth(.16, .4, Math.abs(distance));
@@ -75,15 +92,53 @@ export function JourneyExperience() {
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
     };
-  }, []);
+  }, [startAt, last, total]);
+
+  // At the last stop, a further push down (wheel, swipe or key) hands over to what follows. The
+  // push only counts once the walk has rested there briefly, so the tail of the scroll that
+  // arrived at the stop does not carry straight on.
+  useEffect(() => {
+    let since = 0;
+    let gathered = 0;
+    const atEnd = () => {
+      const arrived = progress.current >= last - .01;
+      if (!arrived) { since = 0; gathered = 0; return false; }
+      if (!since) since = performance.now();
+      return performance.now() - since > 450;
+    };
+    const finish = () => { since = 0; gathered = 0; onEndRef.current?.(); };
+    const wheel = (event: WheelEvent) => {
+      if (!onEndRef.current || !atEnd() || event.deltaY <= 0) return;
+      gathered += event.deltaY;
+      if (gathered > 70) finish();
+    };
+    let startY = 0;
+    const touchStart = (event: TouchEvent) => { startY = event.touches[0]?.clientY ?? 0; };
+    const touchEnd = (event: TouchEvent) => {
+      if (onEndRef.current && atEnd() && startY - (event.changedTouches[0]?.clientY ?? startY) > 50) finish();
+    };
+    const key = (event: KeyboardEvent) => {
+      if (onEndRef.current && atEnd() && (event.key === "ArrowDown" || event.key === "PageDown" || event.key === " ")) finish();
+    };
+    window.addEventListener("wheel", wheel, { passive: true });
+    window.addEventListener("touchstart", touchStart, { passive: true });
+    window.addEventListener("touchend", touchEnd, { passive: true });
+    window.addEventListener("keydown", key);
+    return () => {
+      window.removeEventListener("wheel", wheel);
+      window.removeEventListener("touchstart", touchStart);
+      window.removeEventListener("touchend", touchEnd);
+      window.removeEventListener("keydown", key);
+    };
+  }, [last]);
 
   const visit = useCallback((index: number) => {
     const element = root.current;
     if (!element) return;
-    const target = Math.max(0, Math.min(END, index));
+    const target = Math.max(0, Math.min(last, index));
     const travel = element.offsetHeight - innerHeight;
-    window.scrollTo({ top: target / END * travel, behavior: reduced ? "instant" : "smooth" });
-  }, [reduced]);
+    window.scrollTo({ top: target / last * travel, behavior: reduced ? "instant" : "smooth" });
+  }, [reduced, last]);
 
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
@@ -95,7 +150,7 @@ export function JourneyExperience() {
         mallLook.current.yaw += event.key === "ArrowLeft" ? -.3 : .3;
         return;
       }
-      const current = WALK[Math.round(progress.current)];
+      const current = stops[Math.round(progress.current)];
       if (current.piece === undefined || !FLOATING_PIECES.has(current.piece)) return;
       if (event.key === "ArrowLeft") spin.current.velocity -= 3.2;
       if (event.key === "ArrowRight") spin.current.velocity += 3.2;
@@ -111,8 +166,8 @@ export function JourneyExperience() {
     document.getElementById("house")?.scrollIntoView({ behavior: reduced ? "instant" : "smooth" });
   }, [reduced]);
 
-  return <div ref={root} className="jr" data-ready={ready} data-piece={Boolean(piece)} data-looking={looking} data-stop={active} data-released={released} style={{ height: `${100 + END * JOURNEY_STEP * 100}svh` }}>
-    {WALK.map((_, index) => <div key={index} className="jr-snap" aria-hidden="true" style={{ top: `${index * JOURNEY_STEP * 100}svh` }} />)}
+  return <div ref={root} className="jr" data-ready={ready} data-piece={Boolean(piece)} data-looking={looking} data-stop={active} data-released={released} style={{ height: `${100 + last * JOURNEY_STEP * 100}svh` }}>
+    {stops.map((_, index) => <div key={index} className="jr-snap" aria-hidden="true" style={{ top: `${index * JOURNEY_STEP * 100}svh` }} />)}
     <div className="jr-stage" aria-hidden="true"
       onPointerDown={(event) => {
         if ((!floating && !looking) || event.button !== 0) return;
@@ -150,7 +205,7 @@ export function JourneyExperience() {
     </header>
 
     <main className="jr-stories">
-      {WALK.map((item, index) => {
+      {stops.map((item, index) => {
         const creation = item.piece === undefined ? undefined : PIECES[item.piece];
         return <section key={item.label} className={`jr-copy${creation ? " jr-copy-piece" : ""}`} style={{ opacity: index ? 0 : 1 }} aria-hidden={index !== 0} inert={index !== 0}>
           <p className="jr-kicker">{item.kicker}</p>
@@ -167,8 +222,12 @@ export function JourneyExperience() {
             <Link href={`/jewellery/${creation.slug}`} className="jr-link">The original piece ↗</Link>
             <Link href="/appointment" className="jr-link">Ask to see this piece ↗</Link>
           </div>}
-          {index === END && <div className="jr-piece-actions">
+          {index === last && end !== undefined && !onEnd && <div className="jr-piece-actions">
             <button className="jr-button" onClick={enterHouse}>Continue into the house <span>↓</span></button>
+          </div>}
+          {index === last && !onEnd && end === undefined && <div className="jr-piece-actions">
+            <Link href="/appointment" className="jr-button">Book a private viewing <span>↗</span></Link>
+            <Link href="/collections" className="jr-link">Browse the collection</Link>
           </div>}
         </section>;
       })}
@@ -182,16 +241,19 @@ export function JourneyExperience() {
     </div>}
 
     <nav className="jr-rail" aria-label="Journey stops">
-      {WALK.map((item, index) => <button key={item.label} onClick={() => visit(index)} aria-label={item.label} aria-current={active === index ? "step" : undefined} data-piece={item.piece !== undefined}>
+      {stops.map((item, index) => <button key={item.label} onClick={() => visit(index)} aria-label={item.label} aria-current={active === index ? "step" : undefined} data-piece={item.piece !== undefined}>
         <span>{item.label}</span><i />
+      </button>)}
+      {after.map((label, index) => <button key={`a${label}`} onClick={() => onEnd?.(index)} aria-label={label}>
+        <span>{label}</span><i />
       </button>)}
     </nav>
 
     <footer className="jr-footer">
-      <span className="jr-count">{String(Math.min(active, END) + 1).padStart(2, "0")}<i> / {String(WALK.length).padStart(2, "0")}</i></span>
-      <button className="jr-next" onClick={() => (active === END ? enterHouse() : visit(active + 1))}>
-        {active === END ? "Continue into the house" : active === 0 ? "Scroll to begin" : piece ? "Scroll for the next creation" : "Scroll to keep walking"}
-        <span>↓</span>
+      <span className="jr-count">{String(Math.min(active, last) + 1).padStart(2, "0")}<i> / {String(total ?? stops.length).padStart(2, "0")}</i></span>
+      <button className="jr-next" onClick={() => (active === last && onEnd ? onEnd() : active === last && end !== undefined ? enterHouse() : visit(active === last ? 0 : active + 1))}>
+        {active === last && onEnd ? "Scroll into the hall" : active === last && end !== undefined ? "Continue into the house" : active === last ? "Walk it again" : active === 0 ? "Scroll to begin" : piece ? "Scroll for the next creation" : "Scroll to keep walking"}
+        <span>{active === last && !onEnd && end === undefined ? "↺" : "↓"}</span>
       </button>
     </footer>
     <div className="jr-progress" aria-hidden="true" />
