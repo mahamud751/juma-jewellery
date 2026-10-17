@@ -28,10 +28,11 @@ export function SiteFooter() {
         </div>
         <div className="footer-col">
           <p className="eyebrow">The house</p>
+          <Link href="/about">About</Link>
+          <Link href="/contact">Contact</Link>
           <Link href="/maison">The salon</Link>
           <Link href="/appointment">Book a visit</Link>
           <Link href="/wishlist">Wishlist</Link>
-          <Link href="/jewellery">Every frame</Link>
         </div>
       </div>
       <p className="footer-mark wordmark" aria-hidden="true">JHUMA</p>

@@ -26,25 +26,27 @@ export const STOPS: Stop[] = [
   { label: "The doors", kicker: "Jhuma Jewellers", title: "Beyond these doors.", line: "Keep scrolling. The doors are opening for you.", photo: 35 },
   { label: "The salon", kicker: "The Jhuma salon", title: "Welcome to Jhuma.", line: "Gold on royal blue velvet, framed in carved wood and warm light.", photo: 36 },
   { label: "Chain gallery", kicker: "The chain gallery", title: "Every chain,\nunder the golden arch.", line: "Rope, box and floral chains, with the pendants at the centre.", photo: 37 },
-  { label: "Floral chains", kicker: "Creation 01 · Chain gallery", title: "Floral Chains", line: "The chains as they hang in the salon: flower stations, rope and a fine trace, on royal blue.", photo: 37, piece: 0 },
-  { label: "Necklace wall", kicker: "The necklace wall", title: "Gold, on royal blue.", line: "Bridal sets on velvet busts, each with its matching earrings.", photo: 38 },
-  { label: "Floral har", kicker: "Creation 02 · Necklace wall", title: "Floral Har", line: "The layered set from the alcove. A filigree collar, a flower pendant, and the jhumka made to sit with it.", photo: 38, piece: 1 },
-  { label: "Jhumka", kicker: "Creation 03 · Necklace wall", title: "Bell Jhumka", line: "The jhumka from that set: a round gold bell, beadwork, and a small drop.", photo: 38, piece: 2 },
-  { label: "Fan pendant", kicker: "Creation 04 · Necklace wall", title: "Fan Pendant", line: "A long haar from the alcove, the pendant fringed in gold, with its earrings beside it.", photo: 38, piece: 3 },
-  { label: "Gold rings", kicker: "Creation 05 · The counter", title: "Gold Rings", line: "Signet rings and gold bands, each on its own blue cushion, as they sit on the counter.", photo: 38, piece: 4 },
+  { label: "Floral chains", kicker: "Creation 01 · Chain gallery", title: "Floral Chains", line: "The chains as they hang on these boards: flower stations, rope and a fine trace, on royal blue.", photo: 37, piece: 0 },
+  { label: "Necklace wall", kicker: "The necklace wall", title: "Gold, on royal blue.", line: "A different room. Bridal sets on velvet busts, each with its matching earrings.", photo: 38 },
+  { label: "Floral har", kicker: "Creation 02 · The cases", title: "Floral Har", line: "The next room. Gold sets in the cases: a collar, a flower pendant, and the earrings beside them.", photo: 36, piece: 1 },
+  { label: "Jhumka", kicker: "Creation 03 · Brought forward", title: "Bell Jhumka", line: "Into the gallery. The bell jhumka comes forward: round gold, beadwork, and a small drop.", photo: 37, piece: 2 },
+  { label: "Fan pendant", kicker: "Creation 04 · The alcove", title: "Fan Pendant", line: "Through to the alcove. The fan pendant hangs on the bust, earrings beside it.", photo: 38, piece: 3 },
+  { label: "Gold rings", kicker: "Creation 05 · The glass counter", title: "Gold Rings", line: "One room over. Signet rings and gold bands, each on its own blue cushion, in the glass.", photo: 37, piece: 4 },
   { label: "Private viewing", kicker: "Private viewing · Sylhet Plaza, 4th floor", title: "A seat is\nwaiting for you.", line: "Book a private viewing and we will have your pieces ready when you arrive.", photo: 36 },
 ];
 export const LAST_STOP = STOPS.length - 1;
 
 export const PIECES = [
   { name: "Floral Chains", bengali: "ফুলের চেইন", slug: "chain-boards", details: ["Yellow gold", "The chain boards", "Jhuma, Sylhet"] },
-  { name: "Floral Har", bengali: "ফ্লোরাল হার", slug: "floral-har", details: ["Yellow gold", "Necklace and jhumka", "The alcove"] },
-  { name: "Bell Jhumka", bengali: "ঝুমকা", slug: "floral-har", details: ["Yellow gold", "From the floral set", "Bead and drop"] },
+  { name: "Floral Har", bengali: "ফ্লোরাল হার", slug: "floral-har", details: ["Yellow gold", "Necklace and earrings", "In the cases"] },
+  { name: "Bell Jhumka", bengali: "ঝুমকা", slug: "floral-har", details: ["Yellow gold", "Bell, bead and drop", "Brought forward"] },
   { name: "Fan Pendant", bengali: "পাখা লকেট", slug: "fan-pendant", details: ["Yellow gold", "Fringed haar", "Matching earrings"] },
-  { name: "Gold Rings", bengali: "সোনার আংটি", slug: "ring-counter-near", details: ["Yellow gold", "Signet and band", "The ring counter"] },
+  { name: "Gold Rings", bengali: "সোনার আংটি", slug: "ring-counter-near", details: ["Yellow gold", "Signet and band", "The glass counter"] },
 ] as const;
 /** The stop each creation is shown at. */
 export const PIECE_STOPS = STOPS.flatMap((stop, index) => (stop.piece === undefined ? [] : [index]));
+/** Pieces sharp enough to lift off the room. The others stay in the photograph. */
+export const FLOATING_PIECES = new Set<number>([2]);
 
 /**
  * How the camera moves inside each photograph. Every key names two pixels of the photo, as fractions
@@ -91,37 +93,62 @@ const PHOTO_SHOTS: Shot[] = [
     ],
   },
   {
-    photo: 37, near: 2, far: 7.5, from: 3.5, to: 5.74,
+    // Chain gallery, then the boards. The chains themselves are the piece.
+    photo: 37, near: 2, far: 7.5, from: 3.5, to: 5.58,
     keys: [
       { at: 3.5, go: [.5, .45], f: 0, look: [.5, .48] },
-      { at: 4, go: [.5, .42], f: .14, look: [.5, .45] },
-      { at: 4.25, go: [.5, .42], f: .18, look: [.5, .44] },
-      { at: 4.72, go: [.5, .38], f: .48, look: [.5, .38], dim: .78 },
-      { at: 5.25, go: [.5, .38], f: .52, look: [.5, .38], dim: .78 },
-      { at: 5.74, go: [.5, .4], f: .66, look: [.5, .4], dim: .5 },
+      { at: 4, go: [.5, .42], f: .16, look: [.5, .4] },
+      { at: 4.5, go: [.64, .42], f: .12, look: [.7, .38] },
+      { at: 5, go: [.63, .42], f: .11, look: [.64, .4], dim: .1 },
     ],
   },
   {
-    photo: 38, near: 2, far: 7.5, from: 5.52, to: 10.62,
+    // Necklace wall. The hole between rooms opens after the chains have settled.
+    photo: 38, near: 2, far: 7.5, from: 5.22, to: 6.58,
     keys: [
-      { at: 5.52, go: [.5, .47], f: 0, look: [.5, .5] },
-      { at: 6, go: [.5, .45], f: .12, look: [.5, .46] },
-      { at: 6.25, go: [.5, .45], f: .15, look: [.5, .46] },
-      { at: 6.72, go: [.51, .4], f: .46, look: [.51, .39], dim: .78 },
-      { at: 7.25, go: [.51, .4], f: .48, look: [.51, .39], dim: .78 },
-      { at: 8, go: [.6, .46], f: .44, look: [.6, .45], dim: .8 },
-      { at: 9, go: [.26, .55], f: .3, look: [.24, .58], dim: .82 },
-      { at: 10, go: [.66, .55], f: .3, look: [.68, .58], dim: .82 },
-      { at: 10.62, go: [.5, .6], f: .55, look: [.5, .6], dim: .6 },
+      { at: 5.22, go: [.5, .48], f: 0, look: [.5, .46] },
+      { at: 6, go: [.46, .44], f: .12, look: [.4, .4], dim: .1 },
     ],
   },
   {
-    photo: 36, near: 1.9, far: 8, from: 10.4, to: 12,
+    // Floral har: the case room, entered from the necklace wall. The busts are the piece.
+    photo: 36, near: 1.9, far: 8, from: 6.22, to: 7.58,
     keys: [
-      { at: 10.4, go: [.5, .5], f: 0, look: [.5, .47], dim: .3 },
-      { at: 10.85, go: [.4, .7], f: .06, look: [.46, .5], dim: .35 },
-      { at: 11, go: [.4, .7], f: .1, look: [.44, .52], dim: .35 },
-      { at: 12, go: [.4, .7], f: .16, look: [.42, .53], dim: .35 },
+      { at: 6.22, go: [.22, .48], f: 0, look: [.16, .46] },
+      { at: 7, go: [.14, .48], f: .22, look: [.1, .42], dim: .12 },
+    ],
+  },
+  {
+    // Bell jhumka, the one sharp cut-out, brought forward in the gallery.
+    photo: 37, near: 2, far: 7.5, from: 7.22, to: 8.58,
+    keys: [
+      { at: 7.22, go: [.5, .46], f: 0, look: [.5, .44], dim: .25 },
+      { at: 8, go: [.5, .44], f: .12, look: [.5, .4], dim: .76 },
+    ],
+  },
+  {
+    // Fan pendant: the alcove in the necklace room. The bust is the piece.
+    photo: 38, near: 2, far: 7.5, from: 8.22, to: 9.58,
+    keys: [
+      { at: 8.22, go: [.58, .46], f: 0, look: [.56, .44] },
+      { at: 9, go: [.6, .44], f: .1, look: [.62, .4], dim: .08 },
+    ],
+  },
+  {
+    // Gold rings: the glass in the chain room. Stay back so the counter stays whole.
+    photo: 37, near: 2, far: 7.5, from: 9.22, to: 10.58,
+    keys: [
+      { at: 9.22, go: [.5, .6], f: 0, look: [.5, .66] },
+      { at: 10, go: [.5, .74], f: .16, look: [.5, .82], dim: .2 },
+    ],
+  },
+  {
+    // Private viewing. The logo and the chairs, after the counter.
+    photo: 36, near: 1.9, far: 8, from: 10.22, to: 12,
+    keys: [
+      { at: 10.22, go: [.46, .44], f: 0, look: [.44, .42] },
+      { at: 11, go: [.32, .58], f: .22, look: [.28, .5], dim: .1 },
+      { at: 12, go: [.26, .66], f: .3, look: [.22, .56], dim: .08 },
     ],
   },
 ];

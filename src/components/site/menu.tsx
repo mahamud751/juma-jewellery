@@ -6,9 +6,10 @@ import { COLLECTIONS } from "@/lib/catalog";
 
 const LINKS = [
   { href: "/", label: "Home" },
+  { href: "/jewellery", label: "Jewellery" },
   { href: "/collections", label: "Collections" },
-  { href: "/jewellery", label: "Every frame" },
-  { href: "/maison", label: "The Salon" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
   { href: "/appointment", label: "Book a visit" },
 ];
 

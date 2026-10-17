@@ -3,12 +3,16 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { DOOR_STOP, JOURNEY_STEP, LAST_STOP, MALL, PIECES, STOPS, photoUrl, smooth } from "@/lib/journey";
+import { DOOR_STOP, FLOATING_PIECES, JOURNEY_STEP, MALL, PIECES, STOPS, photoUrl, smooth } from "@/lib/journey";
 import type { Spin } from "./showcase";
 import type { MallLook } from "./mall-passage";
 import "@/app/journey.css";
 
 const JourneyStage = dynamic(() => import("./journey-stage"), { ssr: false });
+
+/** The opening walk is eight stops. The shop begins after the last one. */
+const WALK = STOPS.slice(0, 8);
+const END = WALK.length - 1;
 
 export function JourneyExperience() {
   const root = useRef<HTMLDivElement>(null);
@@ -21,8 +25,10 @@ export function JourneyExperience() {
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [loaded, setLoaded] = useState(0);
-  const stop = STOPS[active];
+  const [released, setReleased] = useState(false);
+  const stop = WALK[Math.min(active, END)];
   const piece = stop.piece === undefined ? undefined : PIECES[stop.piece];
+  const floating = stop.piece !== undefined && FLOATING_PIECES.has(stop.piece);
 
   const fail = useCallback(() => { setFailed(true); setReady(true); }, []);
   const onReady = useCallback(() => setReady(true), []);
@@ -41,14 +47,15 @@ export function JourneyExperience() {
       const element = root.current;
       if (!element) return;
       const travel = Math.max(1, element.offsetHeight - innerHeight);
-      const p = Math.min(LAST_STOP, Math.max(0, scrollY / travel * LAST_STOP));
+      const p = Math.min(END, Math.max(0, scrollY / travel * END));
       progress.current = p;
+      setReleased(scrollY > travel + 24);
       if (p < .8 || p > 1.4) {
         mallLook.current = { yaw: 0, pitch: 0 };
         setLooking(false);
       }
       setActive(Math.round(p));
-      element.style.setProperty("--journey", String(p / LAST_STOP));
+      element.style.setProperty("--journey", String(p / END));
       element.querySelectorAll<HTMLElement>(".jr-copy").forEach((panel, index) => {
         const distance = p - index;
         const shown = 1 - smooth(.16, .4, Math.abs(distance));
@@ -73,9 +80,9 @@ export function JourneyExperience() {
   const visit = useCallback((index: number) => {
     const element = root.current;
     if (!element) return;
-    const target = Math.max(0, Math.min(LAST_STOP, index));
+    const target = Math.max(0, Math.min(END, index));
     const travel = element.offsetHeight - innerHeight;
-    window.scrollTo({ top: target / LAST_STOP * travel, behavior: reduced ? "instant" : "smooth" });
+    window.scrollTo({ top: target / END * travel, behavior: reduced ? "instant" : "smooth" });
   }, [reduced]);
 
   useEffect(() => {
@@ -88,7 +95,8 @@ export function JourneyExperience() {
         mallLook.current.yaw += event.key === "ArrowLeft" ? -.3 : .3;
         return;
       }
-      if (STOPS[Math.round(progress.current)].piece === undefined) return;
+      const current = WALK[Math.round(progress.current)];
+      if (current.piece === undefined || !FLOATING_PIECES.has(current.piece)) return;
       if (event.key === "ArrowLeft") spin.current.velocity -= 3.2;
       if (event.key === "ArrowRight") spin.current.velocity += 3.2;
     };
@@ -99,11 +107,15 @@ export function JourneyExperience() {
   // Drag sideways on a creation to turn it; vertical drags still scroll the page.
   const drag = useRef<{ id: number; x: number; y: number; t: number } | null>(null);
 
-  return <div ref={root} className="jr" data-ready={ready} data-piece={Boolean(piece)} data-looking={looking} data-stop={active} style={{ height: `${100 + LAST_STOP * JOURNEY_STEP * 100}svh` }}>
-    {STOPS.map((_, index) => <div key={index} className="jr-snap" aria-hidden="true" style={{ top: `${index * JOURNEY_STEP * 100}svh` }} />)}
+  const enterHouse = useCallback(() => {
+    document.getElementById("house")?.scrollIntoView({ behavior: reduced ? "instant" : "smooth" });
+  }, [reduced]);
+
+  return <div ref={root} className="jr" data-ready={ready} data-piece={Boolean(piece)} data-looking={looking} data-stop={active} data-released={released} style={{ height: `${100 + END * JOURNEY_STEP * 100}svh` }}>
+    {WALK.map((_, index) => <div key={index} className="jr-snap" aria-hidden="true" style={{ top: `${index * JOURNEY_STEP * 100}svh` }} />)}
     <div className="jr-stage" aria-hidden="true"
       onPointerDown={(event) => {
-        if ((!piece && !looking) || event.button !== 0) return;
+        if ((!floating && !looking) || event.button !== 0) return;
         drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY, t: performance.now() };
         event.currentTarget.setPointerCapture(event.pointerId);
         spin.current.velocity = 0;
@@ -134,11 +146,11 @@ export function JourneyExperience() {
     <header className="jr-header">
       <button className="jr-brand" onClick={() => visit(0)} aria-label="Back to Sylhet Plaza">JHUMA<span>J E W E L L E R S</span></button>
       <span className="jr-where"><i />{stop.label}</span>
-      <nav aria-label="Main navigation"><Link href="/collections">Collections</Link><Link href="/appointment" className="jr-cta-small">Private viewing ↗</Link></nav>
+      <nav aria-label="Main navigation"><Link href="/jewellery">Jewellery</Link><Link href="/about">About</Link><Link href="/contact">Contact</Link><Link href="/appointment" className="jr-cta-small">Private viewing ↗</Link></nav>
     </header>
 
     <main className="jr-stories">
-      {STOPS.map((item, index) => {
+      {WALK.map((item, index) => {
         const creation = item.piece === undefined ? undefined : PIECES[item.piece];
         return <section key={item.label} className={`jr-copy${creation ? " jr-copy-piece" : ""}`} style={{ opacity: index ? 0 : 1 }} aria-hidden={index !== 0} inert={index !== 0}>
           <p className="jr-kicker">{item.kicker}</p>
@@ -151,13 +163,12 @@ export function JourneyExperience() {
           {index === MALL.stop && <button className="jr-button" onClick={() => visit(MALL.stop + 1)}>Continue through the plaza <span>↓</span></button>}
           {index === DOOR_STOP && <button className="jr-button" onClick={() => visit(DOOR_STOP + 1)}>Open the doors <span>↓</span></button>}
           {creation && <div className="jr-piece-actions">
-            <span className="jr-drag"><b>⟲</b> Drag to turn</span>
+            {item.piece !== undefined && FLOATING_PIECES.has(item.piece) && <span className="jr-drag"><b>⟲</b> Drag to turn</span>}
             <Link href={`/jewellery/${creation.slug}`} className="jr-link">The original piece ↗</Link>
             <Link href="/appointment" className="jr-link">Ask to see this piece ↗</Link>
           </div>}
-          {index === LAST_STOP && <div className="jr-piece-actions">
-            <Link href="/appointment" className="jr-button">Book a private viewing <span>↗</span></Link>
-            <Link href="/collections" className="jr-link">Browse the collection</Link>
+          {index === END && <div className="jr-piece-actions">
+            <button className="jr-button" onClick={enterHouse}>Continue into the house <span>↓</span></button>
           </div>}
         </section>;
       })}
@@ -171,16 +182,16 @@ export function JourneyExperience() {
     </div>}
 
     <nav className="jr-rail" aria-label="Journey stops">
-      {STOPS.map((item, index) => <button key={item.label} onClick={() => visit(index)} aria-label={item.label} aria-current={active === index ? "step" : undefined} data-piece={item.piece !== undefined}>
+      {WALK.map((item, index) => <button key={item.label} onClick={() => visit(index)} aria-label={item.label} aria-current={active === index ? "step" : undefined} data-piece={item.piece !== undefined}>
         <span>{item.label}</span><i />
       </button>)}
     </nav>
 
     <footer className="jr-footer">
-      <span className="jr-count">{String(active + 1).padStart(2, "0")}<i> / {String(STOPS.length).padStart(2, "0")}</i></span>
-      <button className="jr-next" onClick={() => visit(active === LAST_STOP ? 0 : active + 1)}>
-        {active === LAST_STOP ? "Walk it again" : active === 0 ? "Scroll to begin" : piece ? "Scroll for the next creation" : "Scroll to keep walking"}
-        <span>{active === LAST_STOP ? "↺" : "↓"}</span>
+      <span className="jr-count">{String(Math.min(active, END) + 1).padStart(2, "0")}<i> / {String(WALK.length).padStart(2, "0")}</i></span>
+      <button className="jr-next" onClick={() => (active === END ? enterHouse() : visit(active + 1))}>
+        {active === END ? "Continue into the house" : active === 0 ? "Scroll to begin" : piece ? "Scroll for the next creation" : "Scroll to keep walking"}
+        <span>↓</span>
       </button>
     </footer>
     <div className="jr-progress" aria-hidden="true" />

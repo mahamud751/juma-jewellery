@@ -7,9 +7,10 @@ import { Menu } from "@/components/site/menu";
 import { useWishlist } from "@/lib/wishlist";
 
 const NAV = [
-  { href: "/collections", label: "Collections" },
   { href: "/jewellery", label: "Jewellery" },
-  { href: "/maison", label: "Salon" },
+  { href: "/collections", label: "Collections" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function SiteHeader() {

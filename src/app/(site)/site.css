@@ -1,9 +1,13 @@
 /* ── Site pages: scrolling layout that shares the experience's type and palette ── */
 
-html:has(.site) {
+html:has(.site):not(:has(.jr)) {
   font-size: clamp(13px, 0.92vw, 16px);
   overflow-y: auto;
 }
+
+.home-site .site-header { position: sticky; }
+.home-site .grain { position: absolute; }
+.home-site .site-main > .section:first-child { padding-top: 6.5rem; }
 
 .site {
   --bg: #0b0d12;
@@ -495,7 +499,7 @@ html:has(.site) {
   position: sticky;
   top: 0;
   height: 100vh;
-  background: #10141c;
+  background: #0c0a08;
   border-right: 1px solid var(--line);
   overflow: hidden;
 }
@@ -828,7 +832,10 @@ html:has(.site) {
   .feature,
   .visit-band,
   .room-band { grid-template-columns: 1fr; padding: 3rem 1.2rem; }
-  .home-collections { grid-template-columns: 1fr; }
+  .home-collections,
+  .review-grid { grid-template-columns: 1fr; }
+  .reviews { padding: 1rem 1.2rem 3rem; }
+  .section-head { margin-inline: 0 !important; flex-direction: column; align-items: flex-start; }
   .home-tile { min-height: 70vw; }
   .film-rail { padding-inline: 1.2rem; }
   .film-card { flex-basis: 78vw; }
@@ -1055,7 +1062,25 @@ html:has(.site) {
 .room-band h2,
 .room-band p { color: #f6f1e6; }
 
-.cta-band p { font-family: var(--font-serif), serif; font-size: 1.6rem; }
+.cta-band { display: flex; flex-direction: column; align-items: flex-start; gap: 1.4rem; }
+.cta-band p { font-family: var(--font-serif), serif; font-size: 1.6rem; color: var(--soft); }
+
+.reviews { padding: 2rem 5rem 6rem; }
+.review-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+.review {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.6rem;
+  min-height: 16rem;
+  margin: 0;
+  padding: 1.8rem;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 70%);
+}
+.review p { font-family: var(--font-serif), serif; font-size: 1.35rem; line-height: 1.45; color: #f6f1e6; }
+.review cite { font-style: normal; font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.contact-facts { margin-top: 0.4rem; }
 
 .maison-pair {
   display: grid;

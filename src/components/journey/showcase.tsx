@@ -5,7 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type RefObject } from "react";
 import * as THREE from "three";
 import { Studio } from "@/components/jewels";
-import { DOORS, PIECE_STOPS, smooth } from "@/lib/journey";
+import { DOORS, FLOATING_PIECES, PIECE_STOPS, smooth } from "@/lib/journey";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { ReliefPhoto } from "@/components/relief-photo";
 
@@ -16,7 +16,7 @@ type Props = { progress: RefObject<number>; spin: RefObject<Spin>; reduced: bool
 const ORIGINALS = [
   { src: "/media/hero/chains.jpg", height: 2.5 },
   { src: "/media/full/IMG_7126.jpg", height: 1.85 },
-  { src: "/media/hero/jhumka.jpg", height: 2.45 },
+  { src: "/media/hero/jhumka.jpg", height: 1.75 },
   { src: "/media/hero/fan.jpg", height: 2.7 },
   { src: "/media/hero/rings.jpg", height: 1.42 },
 ];
@@ -161,32 +161,59 @@ function Doors({ progress }: { progress: RefObject<number> }) {
 
 /* ───────────────────────── The creations ───────────────────────── */
 
+/**
+ * Where each piece travels while its stop is on screen. `from` is the place it
+ * leaves in the salon; `to` is where it rests, closer to the lens. `yaw` is its
+ * own turn, so the five stops do not repeat one motion.
+ */
+const FLOATING_STOPS = PIECE_STOPS.filter((_, index) => FLOATING_PIECES.has(index));
+
+const MOVES: { from: [number, number, number]; to: [number, number, number]; yaw: number }[] = [
+  { from: [0.15, -1.2, -0.35], to: [0.02, 0.04, 0.55], yaw: -0.62 },
+  { from: [-1.8, 0.25, -0.25], to: [-0.06, 0.06, 0.85], yaw: 0.5 },
+  { from: [0.2, 1.4, 0.05], to: [0.08, 0.14, 1.05], yaw: -0.24 },
+  { from: [1.85, -0.1, -0.2], to: [0.04, 0.0, 0.75], yaw: 0.72 },
+  { from: [0.4, -1.3, 0.1], to: [0.0, -0.06, 0.45], yaw: -0.5 },
+];
+
 function Creation({ index, progress, spin, reduced }: { index: number; progress: RefObject<number>; spin: RefObject<Spin>; reduced: boolean }) {
   const outer = useRef<THREE.Group>(null), turn = useRef<THREE.Group>(null);
   const stop = PIECE_STOPS[index];
   const piece = ORIGINALS[index];
+  const move = MOVES[index];
   const size = useThree((state) => state.size);
   const portrait = size.width / size.height < .8;
   useFrame(({ clock }) => {
     const distance = progress.current - stop;
-    const v = 1 - smooth(.22, .5, Math.abs(distance));
+    const presence = 1 - smooth(.2, .58, Math.abs(distance));
     if (!outer.current || !turn.current) return;
-    outer.current.visible = v > .001;
+    outer.current.visible = presence > .001;
     if (!outer.current.visible) return;
-    const eased = 1 - (1 - v) ** 3;
-    // Phones keep the copy in the lower half, so the photograph sits higher and smaller.
-    outer.current.scale.setScalar((portrait ? .62 : 1) * (.55 + .45 * eased));
-    outer.current.position.set(portrait ? 0 : 1.05, (portrait ? .95 : .02) - (1 - eased) * .5 * Math.sign(distance || 1), 0);
-    // Stay on the photograph. A full spin would show the back of the print.
-    const sweep = reduced ? 0 : Math.sin(distance * 1.7) * .42;
-    const idle = reduced ? 0 : Math.sin(clock.elapsedTime * .4) * .08;
+    const eased = 1 - (1 - presence) ** 3;
+    const closer = 1 - smooth(0, .42, Math.abs(distance));
+    const homeX = portrait ? 0 : .72;
+    const homeY = portrait ? .28 : .05;
+    if (reduced) {
+      outer.current.scale.setScalar(portrait ? .62 : 1);
+      outer.current.position.set(homeX, homeY, 0);
+    } else {
+      outer.current.scale.setScalar((portrait ? .62 : 1) * (.66 + .34 * eased) * (.88 + .2 * closer));
+      outer.current.position.set(
+        THREE.MathUtils.lerp(move.from[0], homeX + move.to[0], eased),
+        THREE.MathUtils.lerp(move.from[1], homeY + move.to[1], eased) - (1 - eased) * .15 * Math.sign(distance || 1),
+        THREE.MathUtils.lerp(move.from[2], move.to[2], eased) * closer,
+      );
+    }
+    // Stay on the piece. A full spin would show the back of the cut-out.
+    const sweep = reduced ? 0 : Math.sin(distance * 1.7 + index * .7) * .22;
+    const idle = reduced ? 0 : Math.sin(clock.elapsedTime * .4 + index * 1.3) * .06;
     const drag = THREE.MathUtils.clamp(spin.current?.angle ?? 0, -1.15, 1.15);
-    turn.current.rotation.y = sweep + drag * .62 + idle;
-    turn.current.rotation.x = Math.sin(clock.elapsedTime * .5) * (reduced ? 0 : .03);
+    turn.current.rotation.y = (reduced ? 0 : move.yaw * eased) + sweep + drag * .62 + idle;
+    turn.current.rotation.x = Math.sin(clock.elapsedTime * .5 + index) * (reduced ? 0 : .035);
   });
   return <group ref={outer} visible={false}>
     <group ref={turn}>
-      <ReliefPhoto src={piece.src} height={piece.height} />
+      <ReliefPhoto src={piece.src} height={piece.height} cutout />
     </group>
   </group>;
 }
@@ -199,7 +226,7 @@ function Showcase({ progress, spin, reduced }: Props) {
   const size = useThree((state) => state.size);
   const portrait = size.width / size.height < .8;
   useFrame(() => {
-    const nearest = Math.min(...PIECE_STOPS.map((stop) => Math.abs(progress.current - stop)));
+    const nearest = Math.min(...FLOATING_STOPS.map((stop) => Math.abs(progress.current - stop)));
     const v = 1 - smooth(.22, .5, nearest);
     if (halo.current) {
       halo.current.visible = v > .001;
@@ -211,7 +238,7 @@ function Showcase({ progress, spin, reduced }: Props) {
   return <>
     <mesh ref={halo} visible={false}><planeGeometry args={[5.2, 5.2]} /><meshBasicMaterial map={haloMap} transparent blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} /></mesh>
     <group ref={dust} visible={false}>{!reduced && <Sparkles count={70} scale={[3.2, 3, 2]} size={2.2} speed={.25} opacity={.7} color="#ffd98f" noise={.6} />}</group>
-    {ORIGINALS.map((piece, index) => <Creation key={piece.src} index={index} progress={progress} spin={spin} reduced={reduced} />)}
+    {ORIGINALS.map((piece, index) => FLOATING_PIECES.has(index) && <Creation key={piece.src} index={index} progress={progress} spin={spin} reduced={reduced} />)}
   </>;
 }
 
@@ -226,11 +253,14 @@ function ForegroundCamera({ progress }: { progress: RefObject<number> }) {
     const aspect = size.width / Math.max(1, size.height);
     const p = progress.current;
     const doors = p < DOORS.gone;
-    const fov = doors ? (aspect < .8 ? 62 : 50) : aspect < .8 ? 44 : 32;
+    const nearest = Math.min(...FLOATING_STOPS.map((stop) => Math.abs(p - stop)));
+    const closer = doors ? 0 : 1 - smooth(.04, .48, nearest);
+    const fov = (doors ? (aspect < .8 ? 62 : 50) : aspect < .8 ? 44 : 32) - closer * 7;
     // Far enough back for the whole doorway to fit, then walk through it.
+    // On a creation the lens comes in, the way a product page scrolls closer.
     const start = Math.max(5.2, 1.85 / (Math.tan(THREE.MathUtils.degToRad(fov / 2)) * aspect));
     const walk = smooth(DOORS.walk[0], DOORS.walk[1], p);
-    const z = doors ? start + (-2.2 - start) * walk ** 1.6 : 5.2;
+    const z = doors ? start + (-2.2 - start) * walk ** 1.6 : 5.2 - closer * 1.15;
     view.position.set(0, doors ? .3 - walk * .15 : 0, z);
     view.lookAt(0, doors ? .42 - walk * .3 : 0, z - 10);
     if (Math.abs(view.fov - fov) > .01 || view.aspect !== aspect) { view.fov = fov; view.aspect = aspect; view.updateProjectionMatrix(); }

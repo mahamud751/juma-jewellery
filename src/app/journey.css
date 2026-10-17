@@ -1,5 +1,5 @@
 /* The scroll walk through Sylhet Plaza and the Jhuma salon. */
-html:has(.jr) { scroll-snap-type: y proximity; overscroll-behavior-y: none; }
+html:has(.jr) { overscroll-behavior-y: none; }
 html:has(.jr), html:has(.jr) body { background: #0b0907; }
 
 .jr {
@@ -12,6 +12,17 @@ html:has(.jr), html:has(.jr) body { background: #0b0907; }
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 .jr-snap { position: absolute; left: 0; width: 1px; height: 1px; scroll-snap-align: start; pointer-events: none; }
+.jr[data-released="true"] .jr-header,
+.jr[data-released="true"] .jr-stories,
+.jr[data-released="true"] .jr-rail,
+.jr[data-released="true"] .jr-footer,
+.jr[data-released="true"] .jr-progress,
+.jr[data-released="true"] .jr-look,
+.jr[data-released="true"] .jr-fallback-note {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 .jr-stage { position: sticky; top: 0; height: 100svh; width: 100%; overflow: hidden; touch-action: pan-y; background: #0b0907; }
 .jr[data-piece="true"] .jr-stage { cursor: grab; }
