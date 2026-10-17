@@ -1094,3 +1094,110 @@ html:has(.site):not(:has(.jr)) {
 .appt-photo { width: min(100%, 28rem); aspect-ratio: 4 / 3; object-fit: cover; margin-top: 0.6rem; }
 
 .ch-hero-stage { aspect-ratio: 4 / 3; }
+
+/* ── quieter salon finish ───────────────────────────── */
+
+.site {
+  --bg: #090807;
+  --panel: #110f0c;
+  --line: rgba(231, 211, 161, 0.18);
+  --soft: #d8cfc2;
+  --accent: #e7d3a1;
+  background:
+    radial-gradient(ellipse 70% 32% at 50% 0%, rgba(231, 211, 161, 0.07), transparent 62%),
+    #090807;
+}
+
+.site .grain { opacity: 0.08; }
+
+.site .wordmark,
+.site .page-title,
+.site .ch-title,
+.site .pdp-name,
+.site .section-heading,
+.site .c-row-name,
+.site .chapter-title,
+.site .confirm-title {
+  background: none;
+  animation: none;
+  color: #f6f1e6;
+  -webkit-text-fill-color: #f6f1e6;
+  letter-spacing: 0.04em;
+}
+
+.site .wordmark {
+  color: #e7d3a1;
+  -webkit-text-fill-color: #e7d3a1;
+  font-weight: 400;
+  letter-spacing: 0.48em;
+}
+
+.site .solid-btn {
+  background: #e7d3a1;
+  border-color: #e7d3a1;
+  color: #1c160e !important;
+  letter-spacing: 0.22em;
+}
+
+.site .solid-btn:hover {
+  background: transparent;
+  color: #e7d3a1 !important;
+}
+
+.site .card {
+  border-color: rgba(231, 211, 161, 0.14);
+  background: #100e0b;
+}
+
+.site .card:hover {
+  border-color: rgba(231, 211, 161, 0.45);
+  background: #14110d;
+}
+
+.site .card-stage { background: #16130f; }
+
+.site .card-stage img,
+.site .card-stage video {
+  transition: transform 1.1s var(--ease);
+}
+
+.site .card:hover .card-stage img,
+.site .card:hover .card-stage video {
+  transform: scale(1.035);
+}
+
+.site .card-name { letter-spacing: 0.06em; }
+
+.site .pdp-stage {
+  background: #090807;
+  display: grid;
+  place-items: center;
+  padding: 6.5rem 2.4rem 2.4rem;
+}
+
+.site .pdp-stage .frame,
+.site .pdp-stage img,
+.site .pdp-stage video {
+  object-fit: contain;
+  background: #090807;
+}
+
+.site .review {
+  min-height: 0;
+  padding: 0 0.4rem 0 0;
+  border: 0;
+  border-top: 1px solid rgba(231, 211, 161, 0.28);
+  background: none;
+}
+
+.site .review p {
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.site .site-header.is-solid {
+  background: rgba(9, 8, 7, 0.88);
+}
+
+.site .footer-mark { opacity: 0.055; }
