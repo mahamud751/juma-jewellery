@@ -35,7 +35,6 @@ export function SiteFooter() {
           <Link href="/wishlist">Wishlist</Link>
         </div>
       </div>
-      <p className="footer-mark wordmark" aria-hidden="true">JHUMA</p>
       <div className="footer-legal">
         <span>© {HOUSE.name}</span>
         <span>{HOUSE.address}</span>

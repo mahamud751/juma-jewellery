@@ -6,8 +6,15 @@ html:has(.site):not(:has(.jr)) {
 }
 
 .home-site .site-header { position: sticky; }
-.home-site .grain { position: absolute; }
 .home-site .site-main > .section:first-child { padding-top: 6.5rem; }
+
+/* Keep the grain inside the house; negative inset + transform was leaving black under the footer. */
+.home-site.site .grain {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+}
 
 .site {
   --bg: #0b0d12;
@@ -728,27 +735,49 @@ html:has(.site):not(:has(.jr)) {
 
 /* ── footer ─────────────────────────────────────────── */
 
-.site-footer { position: relative; z-index: 1; padding: 6rem 5rem 2rem; border-top: 1px solid var(--line); overflow: hidden; }
+.site-footer { position: relative; z-index: 1; padding: 3.5rem 5rem 2rem; border-top: 1px solid var(--line); overflow: hidden; }
 
-.footer-cols { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 3rem; }
-.footer-col { display: flex; flex-direction: column; gap: 0.8rem; }
+.footer-cols { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 2.2rem; }
+.footer-col { display: flex; flex-direction: column; gap: 0.65rem; }
 .footer-col a { color: var(--soft); font-size: 0.95rem; transition: color 0.3s; }
 .footer-col a:hover { color: #fff; }
-.footer-col .eyebrow { margin-bottom: 0.6rem; }
-.footer-intro { align-items: flex-start; gap: 1.6rem; }
+.footer-col .eyebrow { margin-bottom: 0.45rem; }
+.footer-intro { align-items: flex-start; gap: 1.2rem; }
 .footer-intro .line-btn { color: #fff; }
-.footer-lede { font-family: var(--font-serif), serif; font-size: 1.7rem; line-height: 1.25; max-width: 24rem; }
+.footer-lede { font-family: var(--font-serif), serif; font-size: 1.45rem; line-height: 1.3; max-width: 22rem; }
 
 .footer-mark {
-  font-size: 22vw;
-  letter-spacing: 0.08em;
-  text-align: center;
-  line-height: 0.85;
-  margin: 5rem 0 2rem;
-  opacity: 0.08;
+  display: none;
 }
 
-.footer-legal { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+.footer-legal {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.4rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.home-site {
+  min-height: 0;
+}
+
+.home-site .visit-band {
+  padding-bottom: 3.5rem;
+}
+
+.home-site .reviews {
+  padding-bottom: 3rem;
+}
+
+.home-site .section:last-of-type {
+  padding-bottom: 3.5rem;
+}
 
 /* ── 404 ────────────────────────────────────────────── */
 
@@ -1200,4 +1229,171 @@ html:has(.site):not(:has(.jr)) {
   background: rgba(9, 8, 7, 0.88);
 }
 
-.site .footer-mark { opacity: 0.055; }
+
+/* ── motion after the walk ──────────────────────────── */
+
+.house-bridge {
+  padding-top: 7rem;
+  padding-bottom: 2rem;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.house-bridge-title {
+  font-size: clamp(2.8rem, 6vw, 5.6rem);
+}
+
+.house-bridge-line {
+  max-width: 28rem;
+  color: var(--soft);
+  line-height: 1.65;
+}
+
+.collections-head { margin: 0 5rem; }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(1.8rem);
+  filter: blur(8px);
+  transition:
+    opacity 1.1s var(--ease) var(--delay, 0s),
+    transform 1.1s var(--ease) var(--delay, 0s),
+    filter 1.1s var(--ease) var(--delay, 0s);
+}
+
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.site .section-head {
+  position: relative;
+}
+
+.site .section-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(231, 211, 161, 0.55), rgba(231, 211, 161, 0.08) 55%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.1s var(--ease) 0.15s;
+}
+
+.site .section-head.reveal.is-in::after,
+.site .reveal.is-in .section-head::after {
+  transform: none;
+}
+
+.site .section-head.reveal.is-in::after {
+  transform: scaleX(1);
+}
+
+.site .card {
+  transition:
+    border-color 0.55s var(--ease),
+    background 0.55s var(--ease),
+    transform 0.7s var(--ease);
+}
+
+.site .card:hover {
+  transform: translateY(-0.35rem);
+}
+
+.site .solid-btn {
+  overflow: hidden;
+}
+
+.site .solid-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.85s var(--ease);
+}
+
+.site .solid-btn:hover::before {
+  transform: translateX(120%);
+}
+
+.site .home-tile span {
+  transform: translateY(0.8rem);
+  opacity: 0.92;
+  transition: transform 0.8s var(--ease), opacity 0.8s var(--ease);
+}
+
+.site .home-tile:hover span {
+  transform: none;
+  opacity: 1;
+}
+
+.site .home-tile img {
+  transition: transform 1.4s var(--ease), filter 1.4s var(--ease);
+}
+
+.site .home-tile:hover img {
+  transform: scale(1.05);
+  filter: brightness(1.06);
+}
+
+.site .visit-frame {
+  overflow: hidden;
+}
+
+.site .visit-frame img {
+  transition: transform 1.5s var(--ease);
+}
+
+.site .visit-frame:hover img {
+  transform: scale(1.04);
+}
+
+.site .review {
+  transition: border-color 0.6s var(--ease);
+}
+
+.site .review:hover {
+  border-top-color: rgba(231, 211, 161, 0.7);
+}
+
+.jr[data-released="true"] + .home-site {
+  animation: house-rise 0.9s var(--ease) both;
+}
+
+@keyframes house-rise {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+
+.menu:not(.is-open) {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .jr[data-released="true"] + .home-site,
+  .site .card,
+  .site .solid-btn::before,
+  .site .home-tile img,
+  .site .home-tile span,
+  .site .visit-frame img {
+    transition: none !important;
+    animation: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .house-bridge { padding-top: 4.5rem; }
+  .collections-head { margin: 0 !important; }
+}
